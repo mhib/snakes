@@ -1,14 +1,13 @@
-import BoardBuilder from './builders/BoardBuilder';
-import EmptyFiller from './fillers/EmptyFiller';
-import FruitFiller from './fillers/FruitFiller';
-import SnakeFiller from './fillers/SnakeFiller';
-import CellSelector from './selectors/CellSelector';
+import Board from './Board';
 
-const container = document.getElementById('main-component');
+const board = new Board(document.getElementById('main-component'));
 
 const wsUrl = window.location.href.replace(/(^\w+:|^)\/\//, 'ws://')
   .replace('game', 'gamews');
 const socket = new WebSocket(wsUrl);
+socket.onmessage = (msg) => {
+  board.update(JSON.parse(msg.data));
+};
 
 window.addEventListener('keydown', (event) => {
   event.preventDefault();
@@ -23,17 +22,3 @@ window.addEventListener('keydown', (event) => {
   }
 });
 
-let rendered = false;
-let selector;
-
-socket.onmessage = (msg) => {
-  const data = JSON.parse(msg.data);
-  if (!rendered) {
-    BoardBuilder(container, data.width, data.length);
-    rendered = true;
-    selector = new CellSelector(data.width, data.length);
-  }
-  EmptyFiller(selector.all);
-  SnakeFiller(data.snakes, selector.select);
-  FruitFiller(data.fruits, selector.select);
-};
