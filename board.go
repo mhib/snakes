@@ -8,7 +8,7 @@ import (
 )
 
 type Change struct {
-	Id        string
+	ID        string
 	Direction int
 }
 
@@ -142,7 +142,7 @@ func (b *Board) print() {
 
 func (b *Board) changeDirection(change *Change) {
 	for snakeID := range b.Snakes {
-		if b.Snakes[snakeID].Id == change.Id {
+		if b.Snakes[snakeID].ID == change.ID {
 			b.Snakes[snakeID].changeDirection(change.Direction)
 			return
 		}

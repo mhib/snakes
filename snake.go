@@ -5,7 +5,7 @@ type Snake struct {
 	Points    int     `json:"points"`
 	Direction int     `json:"-"`
 	Lost      bool    `json:"-"`
-	Id        string  `json:"id"`
+	ID        string  `json:"id"`
 }
 
 const (
