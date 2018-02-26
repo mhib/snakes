@@ -149,9 +149,10 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 	Games.RLock()
 	defer Games.RUnlock()
 	gameID := strings.TrimPrefix(r.URL.Path, "/game/")
-	_, ok := Games.m[gameID]
-	if !ok {
+	game, ok := Games.m[gameID]
+	if !ok || game.Board.State != WAITING {
 		http.Redirect(w, r, "/", http.StatusFound)
+		return
 	}
 	http.ServeFile(w, r, "frontend/game.html")
 }
@@ -161,8 +162,8 @@ func gameConnectionHandler(w http.ResponseWriter, r *http.Request) {
 	gameID := strings.TrimPrefix(r.URL.Path, "/gamews/")
 	game, ok := Games.m[gameID]
 	Games.RUnlock()
-	if !ok {
-		http.Redirect(w, r, "/", http.StatusFound)
+	if !ok || game.Board.State != WAITING {
+		return
 	}
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
