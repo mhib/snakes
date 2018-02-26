@@ -18,6 +18,13 @@
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
-    "eslint-plugin-react": "^7.6.1"
+    "eslint-plugin-react": "^7.6.1",
+    "uglifyjs-webpack-plugin": "^1.2.2",
+    "webpack-merge": "^4.1.2"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "start": "webpack --config webpack.dev.js -w --progress",
+    "build": "webpack --config webpack.prod.js"
   }
 }
