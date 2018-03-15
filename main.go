@@ -6,6 +6,7 @@ import (
 	"github.com/satori/go.uuid"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -192,5 +193,9 @@ func main() {
 	http.HandleFunc("/new_game/", newGameHandler)
 	http.Handle("/public/", http.StripPrefix("/public/", publicServer))
 	fmt.Println("Waiting on 8080")
-	http.ListenAndServe(":8080", nil)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	http.ListenAndServe(":"+port, nil)
 }
