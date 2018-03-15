@@ -41,7 +41,8 @@
     "lint": "eslint .",
     "start": "webpack --config webpack.dev.js -w --progress",
     "build": "webpack --config webpack.prod.js",
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "webpack -p --config ./webpack.prod.js --progress"
   },
   "jest": {
     "setupTestFrameworkScriptFile": "<rootDir>jestConfig.js"

@@ -36,3 +36,7 @@
 [prune]
   go-tests = true
   unused-packages = true
+[metadata.heroku]
+  root-package = "github.com/mhib/snakes"
+  go-version = "1.10.0"
+  install = [ "./...", "." ]
