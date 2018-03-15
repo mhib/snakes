@@ -1,7 +1,9 @@
 module.exports = {
     "extends": "airbnb",
+    "plugins": ["jest"],
     "env": {
         "browser": true,
+        "jest/globals": true
     },
     "rules": {
         "import/no-extraneous-dependencies": [
