@@ -1,0 +1,13 @@
+language: go
+
+go:
+  - "1.10.x"
+before_install:
+  - nvm install v7.8.0
+  - npm -g install yarn
+install:
+  - go get -t -v ./...
+  - cd frontend; yarn install; cd ..
+script:
+  - go test -v ./...
+  - cd frontend; npm run test
