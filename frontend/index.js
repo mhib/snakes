@@ -2,7 +2,7 @@ import Board from './Board';
 
 const board = new Board(document.getElementById('main-component'));
 
-const wsUrl = window.location.href.replace(/(^\w+:|^)\/\//, 'ws://')
+const wsUrl = window.location.href.replace(/^http/, 'ws')
   .replace('game', 'gamews');
 const socket = new WebSocket(wsUrl);
 socket.onmessage = (msg) => {
