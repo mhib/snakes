@@ -192,10 +192,10 @@ func main() {
 	http.HandleFunc("/gamews/", gameConnectionHandler)
 	http.HandleFunc("/new_game/", newGameHandler)
 	http.Handle("/public/", http.StripPrefix("/public/", publicServer))
-	fmt.Println("Waiting on 8080")
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
+	fmt.Println("Waiting on " + port)
 	http.ListenAndServe(":"+port, nil)
 }
