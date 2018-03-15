@@ -10,12 +10,11 @@
 [[projects]]
   name = "github.com/satori/go.uuid"
   packages = ["."]
-  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
-  version = "v1.2.0"
+  revision = "master"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f7bce8aee37277d50d75f9fc533875ef3fa1f8b64fc53c92492d83c705630337"
+  inputs-digest = "8be28aa526bf08ea3ad08179e8e4602fb10269a5716ee0b572edadb166069e72"
   solver-name = "gps-cdcl"
   solver-version = 1
