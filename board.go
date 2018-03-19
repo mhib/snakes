@@ -45,7 +45,7 @@ func (b *Board) addSnake(id string, size int) {
 		body = append(body, Point{-1, -1})
 	}
 	b.Snakes = append(b.Snakes, Snake{
-		body, 0, rand.Intn(DOWN), false, id})
+		body, 0, rand.Intn(DOWN), false, 0, id})
 }
 
 func (b *Board) tick() {

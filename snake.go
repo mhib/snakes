@@ -5,6 +5,7 @@ type Snake struct {
 	Points    int     `json:"points"`
 	Direction int     `json:"-"`
 	Lost      bool    `json:"-"`
+	Eaten     int     `json:"-"`
 	ID        string  `json:"id"`
 }
 
@@ -41,11 +42,8 @@ func (s *Snake) head() Point {
 }
 
 func (s *Snake) grow(size uint) {
-	s.Points += int(size)
-	for size > 0 {
-		s.Body = append(s.Body, Point{-1, -1})
-		size--
-	}
+	s.Points++
+	s.Eaten += int(size)
 }
 
 func (s *Snake) collide(other *Snake) bool {
@@ -104,5 +102,9 @@ func (s *Snake) move(width, length int) {
 		currentHead.Y = modulo(currentHead.Y+1, length)
 	}
 	s.Body = append([]Point{currentHead}, s.Body...)
-	s.Body = s.Body[:len(s.Body)-1]
+	if s.Eaten == 0 {
+		s.Body = s.Body[:len(s.Body)-1]
+	} else {
+		s.Eaten--
+	}
 }
