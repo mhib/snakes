@@ -25,6 +25,7 @@ export default class Board {
     this.selector = new CellSelector(data.width, data.length);
     this.snakes = {};
     SnakeFiller(data.snakes.map(({ body, id }) => ({ id, add: body[0] })), this.selector.select);
+    FruitFiller(data.fruits, this.selector.select);
     data.snakes.forEach(this.updateSnake);
   }
 

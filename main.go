@@ -21,7 +21,7 @@ type Game struct {
 	MoveTick   time.Duration
 }
 
-type Message struct {
+type UserMessage struct {
 	Direction string `json:"direction"`
 }
 
@@ -30,7 +30,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func (g *Game) sendChange(msg Message, userID string) {
+func (g *Game) sendChange(msg UserMessage, userID string) {
 	var change Change
 	switch msg.Direction {
 	case "LEFT":
@@ -174,7 +174,7 @@ func gameConnectionHandler(w http.ResponseWriter, r *http.Request) {
 	userID := uuid.Must(uuid.NewV4()).String()
 	game.addUser(ws, userID)
 	for {
-		var msg Message
+		var msg UserMessage
 		err := ws.ReadJSON(&msg)
 		if err != nil {
 			break

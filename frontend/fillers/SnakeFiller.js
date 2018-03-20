@@ -1,24 +1,17 @@
 import ColorHash from 'color-hash';
 import memoize from 'lodash.memoize';
+import FillCell from './FillCell';
 
 const colorHash = new ColorHash();
 const memoizedHex = memoize(colorHash.hex.bind(colorHash));
 
-const fillCell = (point, color, selector) => {
-  const cell = selector(point.x, point.y);
-  if (cell) {
-    cell.style.backgroundColor = color;
-  }
-};
-
 const SnakeFiller = (snakes, selector) => {
   snakes.forEach(({ add, remove, id }) => {
-    const hex = memoizedHex(id);
     if (add) {
-      fillCell(add, hex, selector);
+      FillCell(add, memoizedHex(id), selector);
     }
     if (remove) {
-      fillCell(remove, 'initial', selector);
+      FillCell(remove, 'initial', selector);
     }
   });
 };
