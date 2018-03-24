@@ -1,25 +1,21 @@
-body.game {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.board {
-  display: flex;
-  flex-direction: column;
+body {
+  height: 100%;
+  width: 100%;
+  margin: 0;
 }
 
 .row {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: row;
-  height: 10px;
+  height: 0.7em;
+  margin: 0;
 }
 
 .cell {
   border: 1px solid black;
-  width: 10px;
-  height: 10px;
+  width: 0.7em;
+  height: 0.7em;
   display: inline-block;
 }
 

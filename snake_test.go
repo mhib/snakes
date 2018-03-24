@@ -3,7 +3,7 @@ package main
 import "testing"
 
 func TestChangeDirection(t *testing.T) {
-	snake := Snake{[]Point{}, 0, LEFT, false, 0, "dd"}
+	snake := Snake{[]Point{}, 0, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
 	snake.changeDirection(RIGHT)
 	if snake.Direction == RIGHT {
 		t.Error("Changed to opposite direction")
@@ -15,7 +15,7 @@ func TestChangeDirection(t *testing.T) {
 }
 
 func TestGrow(t *testing.T) {
-	snake := Snake{[]Point{}, 0, LEFT, false, 0, "dd"}
+	snake := Snake{[]Point{}, 0, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
 	snake.grow(3)
 	if snake.Eaten != 3 {
 		t.Error("Growing failed")
@@ -23,7 +23,7 @@ func TestGrow(t *testing.T) {
 }
 
 func TestIncludes(t *testing.T) {
-	snake := Snake{[]Point{Point{1, 1}, Point{1, 2}}, 0, LEFT, false, 0, "dd"}
+	snake := Snake{[]Point{Point{1, 1}, Point{1, 2}}, 0, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
 	if !snake.includes(Point{1, 1}) {
 		t.Error("Includes failed")
 	}
@@ -33,18 +33,18 @@ func TestIncludes(t *testing.T) {
 }
 
 func TestCollideItself(t *testing.T) {
-	first := Snake{[]Point{Point{1, 1}, Point{1, 2}, Point{1, 1}}, 0, LEFT, false, 0, "dd"}
+	first := Snake{[]Point{Point{1, 1}, Point{1, 2}, Point{1, 1}}, 0, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
 	if !first.collideItself() {
 		t.Error("Includes failed")
 	}
-	second := Snake{[]Point{Point{1, 1}, Point{1, 2}}, 0, LEFT, false, 0, "dd"}
+	second := Snake{[]Point{Point{1, 1}, Point{1, 2}}, 0, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
 	if second.collideItself() {
 		t.Error("Includes failed")
 	}
 }
 
 func TestMove(t *testing.T) {
-	first := Snake{[]Point{Point{0, 2}, Point{1, 2}, Point{2, 2}}, 0, LEFT, false, 0, "dd"}
+	first := Snake{[]Point{Point{0, 2}, Point{1, 2}, Point{2, 2}}, 0, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
 	first.move(5, 5)
 	newHead := Point{4, 2}
 	if first.head() != newHead {

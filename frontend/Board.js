@@ -24,14 +24,17 @@ export default class Board {
     this.rendered = true;
     this.selector = new CellSelector(data.width, data.length);
     this.snakes = {};
-    SnakeFiller(data.snakes.map(({ body, id }) => ({ id, add: body[0] })), this.selector.select);
+    SnakeFiller(
+      data.snakes.map(({ body, color }) => ({ color, add: body[0] })),
+      this.selector.select,
+    );
     FruitFiller(data.fruits, this.selector.select);
     data.snakes.forEach(this.updateSnake);
   }
 
   generateSnakeDiff(data) {
     return data.snakes.map((snake) => {
-      const update = { id: snake.id };
+      const update = { color: snake.color };
       const oldSnake = this.snakes[snake.id];
       if (!PointEquality(oldSnake.body[0], snake.body[0])) {
         [update.add] = snake.body;

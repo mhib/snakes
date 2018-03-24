@@ -21,8 +21,13 @@ type Game struct {
 	MoveTick   time.Duration
 }
 
-type UserMessage struct {
+type UserMoveMessage struct {
 	Direction string `json:"direction"`
+}
+
+type UserConnectionMessage struct {
+	Name  string `json:"name"`
+	Color string `json:"color"`
 }
 
 var upgrader = websocket.Upgrader{
@@ -30,7 +35,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func (g *Game) sendChange(msg UserMessage, userID string) {
+func (g *Game) sendChange(msg UserMoveMessage, userID string) {
 	var change Change
 	switch msg.Direction {
 	case "LEFT":
@@ -45,10 +50,10 @@ func (g *Game) sendChange(msg UserMessage, userID string) {
 	g.Board.Changes <- change
 }
 
-func (g *Game) addUser(connection *websocket.Conn, userID string) {
+func (g *Game) addUser(connection *websocket.Conn, userID string, name string, color string) {
 	g.Board.Lock()
 	g.Users = append(g.Users, connection)
-	g.Board.addSnake(userID, 3)
+	g.Board.addSnake(userID, name, color, 3)
 	g.Board.Unlock()
 	if g.UsersCount == len(g.Users) {
 		g.Board.State = PREPARING
@@ -85,6 +90,12 @@ func getNumericFromForm(r *http.Request, field string, def int) int {
 		return def
 	}
 	return ret
+}
+
+func getUserData(ws *websocket.Conn) (UserConnectionMessage, error) {
+	var msg UserConnectionMessage
+	err := ws.ReadJSON(&msg)
+	return msg, err
 }
 
 func newGameHandler(w http.ResponseWriter, r *http.Request) {
@@ -172,9 +183,13 @@ func gameConnectionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer ws.Close()
 	userID := uuid.Must(uuid.NewV4()).String()
-	game.addUser(ws, userID)
+	userData, serr := getUserData(ws)
+	if serr != nil {
+		return
+	}
+	game.addUser(ws, userID, userData.Name, userData.Color)
 	for {
-		var msg UserMessage
+		var msg UserMoveMessage
 		err := ws.ReadJSON(&msg)
 		if err != nil {
 			break

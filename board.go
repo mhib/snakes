@@ -39,13 +39,10 @@ func (b *Board) randomPoint() Point {
 	}
 }
 
-func (b *Board) addSnake(id string, size int) {
+func (b *Board) addSnake(id string, name string, color string, size int) {
 	body := []Point{b.randomPoint()}
-	for ; size > 1; size-- {
-		body = append(body, Point{-1, -1})
-	}
 	b.Snakes = append(b.Snakes, Snake{
-		body, 0, rand.Intn(DOWN), false, 0, id})
+		body, 0, rand.Intn(DOWN), false, size - 1, name, color, id})
 }
 
 func (b *Board) tick() {

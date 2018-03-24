@@ -1,14 +1,9 @@
-import ColorHash from 'color-hash';
-import memoize from 'lodash.memoize';
 import FillCell from './FillCell';
 
-const colorHash = new ColorHash();
-const memoizedHex = memoize(colorHash.hex.bind(colorHash));
-
 const SnakeFiller = (snakes, selector) => {
-  snakes.forEach(({ add, remove, id }) => {
+  snakes.forEach(({ add, remove, color }) => {
     if (add) {
-      FillCell(add, memoizedHex(id), selector);
+      FillCell(add, color, selector);
     }
     if (remove) {
       FillCell(remove, 'initial', selector);

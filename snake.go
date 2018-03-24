@@ -6,6 +6,8 @@ type Snake struct {
 	Direction int     `json:"-"`
 	Lost      bool    `json:"-"`
 	Eaten     int     `json:"-"`
+	Name      string  `json:"name"`
+	Color     string  `json:"color"`
 	ID        string  `json:"id"`
 }
 
