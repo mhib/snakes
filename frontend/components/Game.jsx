@@ -13,10 +13,10 @@ width: 100%;
 height: 100%;
 display: flex;
 justify-content: center;
-padding: 2em;
 `;
 
 const BoardContainer = styled.div`
+margin-top: 2em;
 display: flex;
 flex-direction: column;
 `;
