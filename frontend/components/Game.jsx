@@ -52,6 +52,7 @@ export default class Game extends React.Component {
     this.socket = SocketFactory();
     this.socket.onopen = () => {
       this.socket.send(JSON.stringify(formState));
+      this.setState({ gameState: 'waiting' });
     };
     this.socket.onmessage = this.handleUpdate;
     this.socket.onclose = this.handleClose;
@@ -61,7 +62,6 @@ export default class Game extends React.Component {
     this.board = new Board(this.boardDiv);
     this.prepareSocket(formState);
     window.addEventListener('keydown', this.handleKeyDown);
-    this.setState({ gameState: 'waiting' });
   }
 
   handleClose() {
@@ -91,8 +91,8 @@ export default class Game extends React.Component {
   }
 
   updateRanking(data) {
-    const snakes = data.snakes.concat().sort((l, r) => r.points - l.points);
-    this.setState({ ranking: snakes });
+    const ranking = data.snakes.concat().sort((l, r) => r.points - l.points);
+    this.setState({ ranking });
   }
 
   render() {

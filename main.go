@@ -14,6 +14,7 @@ import (
 )
 
 type Game struct {
+	ID         string
 	Board      Board
 	UsersCount int
 	Users      []*websocket.Conn
@@ -98,11 +99,16 @@ func getUserData(ws *websocket.Conn) (UserConnectionMessage, error) {
 	return msg, err
 }
 
-func newGameHandler(w http.ResponseWriter, r *http.Request) {
-	Games.Lock()
-	defer Games.Unlock()
-	r.ParseForm()
-
+func addGame(r *http.Request) string {
+	var gameID string
+	for {
+		uid := uuid.Must(uuid.NewV4())
+		gameID = uid.String()
+		_, ok := Games.m[gameID]
+		if !ok {
+			break
+		}
+	}
 	board := Board{
 		Width: normalizeToRange(
 			getNumericFromForm(r, "width", 20), 1, 100),
@@ -113,17 +119,8 @@ func newGameHandler(w http.ResponseWriter, r *http.Request) {
 		Changes: make(chan Change),
 		End:     make(chan bool),
 	}
-
-	var boardID string
-	for {
-		uid := uuid.Must(uuid.NewV4())
-		boardID = uid.String()
-		_, ok := Games.m[boardID]
-		if !ok {
-			break
-		}
-	}
 	game := &Game{
+		ID:    gameID,
 		Board: board,
 		Users: make([]*websocket.Conn, 0),
 		UsersCount: normalizeToRange(
@@ -133,23 +130,41 @@ func newGameHandler(w http.ResponseWriter, r *http.Request) {
 		MoveTick: time.Duration(normalizeToRange(
 			getNumericFromForm(r, "move_tick", 10), 1, 20000)) * time.Millisecond,
 	}
-	Games.m[boardID] = game
-	http.Redirect(w, r, fmt.Sprintf("/game/%s", boardID), http.StatusFound)
+	Games.m[gameID] = game
+	return gameID
+}
+
+func newGameHandler(w http.ResponseWriter, r *http.Request) {
+	Games.Lock()
+	defer Games.Unlock()
+	r.ParseForm()
+	id := addGame(r)
+
+	http.Redirect(w, r, fmt.Sprintf("/game/%s", id), http.StatusFound)
 }
 
 func (g *Game) NotifyUsers() {
+	newUsers := g.Users[:0]
 	for _, user := range g.Users {
 		err := user.WriteJSON(g.Board)
 		if err != nil {
 			user.Close()
-			g.Board.End <- true
+		} else {
+			newUsers = append(newUsers, user)
 		}
 	}
+	g.Users = newUsers
 }
 
 func handleChanges(g *Game) {
 	g.Board.run(g.MoveTick, g.FoodTick, func(b *Board) {
 		g.NotifyUsers()
+		if len(g.Users) == 0 {
+			b.End <- true
+			Games.Lock()
+			delete(Games.m, g.ID)
+			Games.Unlock()
+		}
 	})
 }
 
