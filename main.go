@@ -169,7 +169,7 @@ func handleChanges(g *Game) {
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "frontend/index.html")
+	http.ServeFile(w, r, "frontend/lobby.html")
 }
 
 func gameHandler(w http.ResponseWriter, r *http.Request) {

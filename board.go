@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -30,17 +31,35 @@ const (
 	ENDED
 )
 
-func (b *Board) randomPoint() Point {
+func (b *Board) isFull() bool {
+	boardSize := b.Length * b.Width
+	sum := len(b.Fruits)
+	for _, s := range b.Snakes {
+		sum += len(s.Body)
+	}
+	return sum == boardSize
+}
+
+func (b *Board) randomPoint() (Point, error) {
+	b.Lock()
+	defer b.Unlock()
+	if b.isFull() {
+		return Point{}, errors.New("Board is full")
+	}
 	for {
 		point := Point{rand.Intn(b.Width), rand.Intn(b.Length)}
 		if !b.partOfSnake(point) && !b.isFruit(point) {
-			return point
+			return point, nil
 		}
 	}
 }
 
 func (b *Board) addSnake(id string, name string, color string, size int) {
-	body := []Point{b.randomPoint()}
+	point, err := b.randomPoint()
+	if err != nil {
+		return
+	}
+	body := []Point{point}
 	b.Snakes = append(b.Snakes, Snake{
 		body, 0, rand.Intn(DOWN), false, size - 1, name, color, id})
 }
@@ -54,8 +73,11 @@ func (b *Board) tick() {
 }
 
 func (b *Board) generateFruit() {
-	b.Fruits = append(b.Fruits, b.randomPoint())
-
+	point, err := b.randomPoint()
+	if err != nil {
+		return
+	}
+	b.Fruits = append(b.Fruits, point)
 }
 
 func (b *Board) isFruit(point Point) bool {
