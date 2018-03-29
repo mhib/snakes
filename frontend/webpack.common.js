@@ -1,9 +1,12 @@
 const path = require('path');
 
 module.exports = {
-  entry: './index.jsx',
+  entry: {
+    game: './game.jsx',
+    lobby: './lobby.jsx',
+  },
   output: {
-    filename: 'bundle.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'public'),
   },
   module: {
