@@ -116,7 +116,7 @@ func addGame(r *http.Request) string {
 			getNumericFromForm(r, "length", 20), 1, 100),
 		Fruits:  make([]Point, 0),
 		State:   WAITING,
-		Changes: make(chan Change),
+		Changes: make(chan Change, 100),
 		End:     make(chan bool),
 	}
 	game := &Game{
@@ -126,7 +126,7 @@ func addGame(r *http.Request) string {
 		UsersCount: normalizeToRange(
 			getNumericFromForm(r, "players", 1), 1, 30),
 		FoodTick: time.Duration(normalizeToRange(
-			getNumericFromForm(r, "food_tick", 2000), 0, 20000)) * time.Millisecond,
+			getNumericFromForm(r, "food_tick", 2000), 0, 120000)) * time.Millisecond,
 		MoveTick: time.Duration(normalizeToRange(
 			getNumericFromForm(r, "move_tick", 10), 1, 20000)) * time.Millisecond,
 	}
