@@ -31,6 +31,8 @@ describe('CellSelector', () => {
     test('it returns undefined', () => {
       expect(selector(-1, 3)).toBeUndefined();
       expect(selector(length + 1, 3)).toBeUndefined();
+      expect(selector(3, -1)).toBeUndefined();
+      expect(selector(3, length + 1)).toBeUndefined();
     });
   });
 });

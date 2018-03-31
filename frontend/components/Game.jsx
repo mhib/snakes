@@ -40,10 +40,6 @@ export default class Game extends React.Component {
     return this.state.gameState === 'waiting';
   }
 
-  shouldRenderBoard() {
-    return this.state.gameState === 'playing';
-  }
-
   shouldRenderRanking() {
     return this.state.ranking.length !== 0;
   }
@@ -73,7 +69,6 @@ export default class Game extends React.Component {
       this.setState({ gameState: 'playing' });
     }
     const parsedData = JSON.parse(data);
-    console.log(parsedData);
     this.board.update(parsedData);
     this.updateRanking(parsedData);
   }
@@ -103,7 +98,6 @@ export default class Game extends React.Component {
         {this.shouldRenderWaiting() && <Waiting />}
         {this.shouldRenderRanking() && <Ranking snakes={this.state.ranking} />}
         <BoardContainer innerRef={(div) => { this.boardDiv = div; }} />
-        {this.state.gameState}
       </GameContainer>
     );
   }
