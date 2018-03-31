@@ -3,7 +3,7 @@ language: go
 go:
   - "1.10.x"
 before_install:
-  - nvm install v7.8.0
+  - nvm install v9.8.0
   - npm -g install yarn
 install:
   - go get -t -v ./...
@@ -11,4 +11,4 @@ install:
 script:
   - go test -v ./...
   - cd frontend && npm run lint && cd ..
-  - cd frontend && npm run test && cd ..
+  - cd frontend && npm run test -- --verbose && cd ..
