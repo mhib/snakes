@@ -5,7 +5,7 @@ import EntryForm from './EntryForm';
 import Waiting from './Waiting';
 import Ranking from './Ranking';
 import SocketFactory from '../factories/SocketFactory';
-import Board from '../Board';
+import Board from '../renderers/DOMBoardRenderer';
 
 const GameContainer = styled.div`
 position: absolute;

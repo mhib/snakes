@@ -2,7 +2,7 @@ import BoardBuilder from './builders/BoardBuilder';
 import FruitFiller from './fillers/FruitFiller';
 import SnakeFiller from './fillers/SnakeFiller';
 import CellSelector from './selectors/CellSelector';
-import PointEquality from './equalities/PointEquality';
+import PointEquality from '../equalities/PointEquality';
 
 export default class Board {
   constructor(container) {

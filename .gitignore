@@ -1,4 +1,4 @@
-frontend/public/*.js
+frontend/public/*.js*
 node_modules
 snakes
 vendor
