@@ -54,8 +54,8 @@ func (g *Game) sendChange(msg UserMoveMessage, userID string) {
 func (g *Game) addUser(connection *websocket.Conn, userID string, name string, color string) {
 	g.Board.Lock()
 	g.Users = append(g.Users, connection)
-	g.Board.addSnake(userID, name, color, 3)
 	g.Board.Unlock()
+	g.Board.addSnake(userID, name, color, 3)
 	if g.UsersCount == len(g.Users) {
 		g.Board.State = PREPARING
 		g.NotifyUsers()
