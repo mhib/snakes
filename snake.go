@@ -1,14 +1,15 @@
 package main
 
 type Snake struct {
-	Body      []Point `json:"body"`
-	Points    int     `json:"points"`
-	Direction int     `json:"-"`
-	Lost      bool    `json:"-"`
-	Eaten     int     `json:"-"`
-	Name      string  `json:"name"`
-	Color     string  `json:"color"`
-	ID        string  `json:"id"`
+	Body          []Point `json:"body"`
+	Points        int     `json:"points"`
+	Direction     int     `json:"-"`
+	PrevDirection int     `json:"-"`
+	Lost          bool    `json:"-"`
+	Eaten         int     `json:"-"`
+	Name          string  `json:"name"`
+	Color         string  `json:"color"`
+	ID            string  `json:"id"`
 }
 
 const (
@@ -34,7 +35,7 @@ func isOpposite(x, y int) bool {
 }
 
 func (s *Snake) changeDirection(Direction int) {
-	if !isOpposite(s.Direction, Direction) {
+	if !isOpposite(s.PrevDirection, Direction) {
 		s.Direction = Direction
 	}
 }
@@ -92,6 +93,7 @@ func modulo(n, m int) int {
 }
 
 func (s *Snake) move(width, length int) {
+	s.PrevDirection = s.Direction
 	currentHead := s.head()
 	switch s.Direction {
 	case LEFT:

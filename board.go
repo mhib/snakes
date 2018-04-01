@@ -60,8 +60,9 @@ func (b *Board) addSnake(id string, name string, color string, size int) {
 		return
 	}
 	body := []Point{point}
+	direction := rand.Intn(DOWN)
 	b.Snakes = append(b.Snakes, Snake{
-		body, 0, rand.Intn(DOWN), false, size - 1, name, color, id})
+		body, 0, direction, direction, false, size - 1, name, color, id})
 }
 
 func (b *Board) tick() {
