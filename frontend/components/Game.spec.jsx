@@ -6,7 +6,7 @@ import Ranking from './Ranking';
 import Board from '../renderers/DOMBoardRenderer';
 
 const mockSocket = { send: jest.fn() };
-jest.mock('../factories/SocketFactory', () => () => mockSocket);
+jest.mock('../factories/GameSocketFactory', () => () => mockSocket);
 jest.mock('../renderers/DOMBoardRenderer');
 
 describe('<Game />', () => {

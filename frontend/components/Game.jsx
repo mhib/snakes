@@ -4,7 +4,7 @@ import bindAll from 'lodash.bindall';
 import EntryForm from './EntryForm';
 import Waiting from './Waiting';
 import Ranking from './Ranking';
-import SocketFactory from '../factories/SocketFactory';
+import SocketFactory from '../factories/GameSocketFactory';
 import Board from '../renderers/DOMBoardRenderer';
 
 const GameContainer = styled.div`

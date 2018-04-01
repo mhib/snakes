@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import PropTypes from 'prop-types';
+import { arrayOf } from 'prop-types';
 import SnakeShape from './shapes/Snake';
 
 const RankingContainer = styled.div`
@@ -34,7 +34,7 @@ const Ranking = ({ snakes }) => (
 );
 
 Ranking.propTypes = {
-  snakes: PropTypes.arrayOf(SnakeShape).isRequired,
+  snakes: arrayOf(SnakeShape).isRequired,
 };
 
 export default Ranking;
