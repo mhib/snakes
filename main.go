@@ -58,8 +58,8 @@ func (g *Game) addUser(connection *websocket.Conn, userID string, name string, c
 	g.Board.Lock()
 	g.Users = append(g.Users, connection)
 	g.EndPingChannels[userID] = make(chan bool, 1)
-	g.Board.Unlock()
 	g.Board.addSnake(userID, name, color, 3)
+	g.Board.Unlock()
 	lobbyUpdateChannel <- true
 	if g.UsersCount == len(g.Users) {
 		g.Board.State = PREPARING

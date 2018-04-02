@@ -41,8 +41,6 @@ func (b *Board) isFull() bool {
 }
 
 func (b *Board) randomPoint() (Point, error) {
-	b.Lock()
-	defer b.Unlock()
 	if b.isFull() {
 		return Point{}, errors.New("Board is full")
 	}
