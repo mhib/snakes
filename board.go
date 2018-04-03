@@ -20,7 +20,8 @@ type Board struct {
 	Snakes          []Snake     `json:"snakes"`
 	Fruits          []Point     `json:"fruits"`
 	State           int         `json:"state"`
-	EndOnLastPlayer bool        `json:"EndOnLastPlayer"`
+	EndOnLastPlayer bool        `json:"-"`
+	Tick            int         `json:"tick"`
 	Changes         chan Change `json:"-"`
 	End             chan bool   `json:"-"`
 }
@@ -188,9 +189,11 @@ func (b *Board) run(moveTick, foodTick time.Duration, callback func(*Board)) {
 			break
 		case <-moveTicker:
 			b.tick()
+			b.Tick++
 			callback(b)
 		case <-foodTicker:
 			b.generateFruit()
+			b.Tick++
 			callback(b)
 		case change := <-b.Changes:
 			b.changeDirection(&change)

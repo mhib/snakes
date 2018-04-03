@@ -126,6 +126,7 @@ func addGame(r *http.Request) string {
 			getNumericFromForm(r, "length", 20), 1, 100),
 		Fruits:  make([]Point, 0),
 		State:   WAITING,
+		Tick:    0,
 		Changes: make(chan Change, 100),
 		End:     make(chan bool),
 	}
