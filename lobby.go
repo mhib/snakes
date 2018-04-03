@@ -30,36 +30,40 @@ func (lc *lobbyConnection) Run() {
 }
 
 type Lobby struct {
-	broadcast   chan []byte
-	register    chan *lobbyConnection
-	unregister  chan *lobbyConnection
-	connections map[*lobbyConnection]bool
+	broadcast      chan []byte
+	register       chan *lobbyConnection
+	unregister     chan *lobbyConnection
+	connections    map[*lobbyConnection]bool
+	initialMessage []byte
 }
 
-func NewLobby() *Lobby {
+func NewLobby(initialMessage []byte) *Lobby {
 	return &Lobby{
-		broadcast:   make(chan []byte),
-		register:    make(chan *lobbyConnection),
-		unregister:  make(chan *lobbyConnection),
-		connections: make(map[*lobbyConnection]bool),
+		broadcast:      make(chan []byte),
+		register:       make(chan *lobbyConnection),
+		unregister:     make(chan *lobbyConnection),
+		connections:    make(map[*lobbyConnection]bool),
+		initialMessage: initialMessage,
 	}
 }
 
 func (l *Lobby) Run() {
+	lastMessage := l.initialMessage
 	for {
 		select {
 		case connection := <-l.register:
 			l.connections[connection] = true
+			connection.send <- lastMessage
 			go connection.Run()
 		case connection := <-l.unregister:
 			if _, ok := l.connections[connection]; ok {
 				delete(l.connections, connection)
 				close(connection.send)
 			}
-		case message := <-l.broadcast:
+		case lastMessage = <-l.broadcast:
 			for connection := range l.connections {
 				select {
-				case connection.send <- message:
+				case connection.send <- lastMessage:
 				default:
 					close(connection.send)
 					delete(l.connections, connection)

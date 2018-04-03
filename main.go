@@ -54,7 +54,7 @@ func (gameMap gamesType) MarshalJSON() ([]byte, error) {
 
 var games = gamesType{m: make(map[string]*Game)}
 
-var lobby = NewLobby()
+var lobby = NewLobby([]byte("[]"))
 
 var lobbyUpdateChannel = make(chan bool, 100)
 
