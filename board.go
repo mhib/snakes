@@ -15,13 +15,14 @@ type Change struct {
 
 type Board struct {
 	sync.Mutex
-	Width   int         `json:"width"`
-	Length  int         `json:"length"`
-	Snakes  []Snake     `json:"snakes"`
-	Fruits  []Point     `json:"fruits"`
-	State   int         `json:"state"`
-	Changes chan Change `json:"-"`
-	End     chan bool   `json:"-"`
+	Width           int         `json:"width"`
+	Length          int         `json:"length"`
+	Snakes          []Snake     `json:"snakes"`
+	Fruits          []Point     `json:"fruits"`
+	State           int         `json:"state"`
+	EndOnLastPlayer bool        `json:"EndOnLastPlayer"`
+	Changes         chan Change `json:"-"`
+	End             chan bool   `json:"-"`
 }
 
 const (
@@ -200,6 +201,26 @@ func (b *Board) run(moveTick, foodTick time.Duration, callback func(*Board)) {
 }
 
 func (b *Board) going() bool {
+	if b.EndOnLastPlayer {
+		return b.hasTwoPlayersPlaying()
+	}
+	return b.hasOnePlayerPlaying()
+}
+
+func (b *Board) hasTwoPlayersPlaying() bool {
+	found := false
+	for _, s := range b.Snakes {
+		if !s.Lost {
+			if found {
+				return true
+			}
+			found = true
+		}
+	}
+	return false
+}
+
+func (b *Board) hasOnePlayerPlaying() bool {
 	for _, s := range b.Snakes {
 		if !s.Lost {
 			return true

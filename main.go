@@ -15,83 +15,6 @@ import (
 	"time"
 )
 
-type Game struct {
-	ID              string
-	Board           Board
-	UsersCount      int
-	Users           []*websocket.Conn
-	FoodTick        time.Duration
-	MoveTick        time.Duration
-	EndPingChannels map[string]chan bool
-}
-
-type UserMoveMessage struct {
-	Direction string `json:"direction"`
-}
-
-type UserConnectionMessage struct {
-	Name  string `json:"name"`
-	Color string `json:"color"`
-}
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
-func (g *Game) sendChange(msg UserMoveMessage, userID string) {
-	var change Change
-	switch msg.Direction {
-	case "LEFT":
-		change = Change{userID, LEFT}
-	case "RIGHT":
-		change = Change{userID, RIGHT}
-	case "UP":
-		change = Change{userID, UP}
-	case "DOWN":
-		change = Change{userID, DOWN}
-	}
-	g.Board.Changes <- change
-}
-
-func (g *Game) addUser(connection *websocket.Conn, userID string, name string, color string) {
-	g.Board.Lock()
-	g.Users = append(g.Users, connection)
-	g.EndPingChannels[userID] = make(chan bool, 1)
-	g.Board.addSnake(userID, name, color, 3)
-	g.Board.Unlock()
-	lobbyUpdateChannel <- true
-	if g.UsersCount == len(g.Users) {
-		g.Board.State = PREPARING
-		g.StopPing()
-		g.NotifyUsers()
-		go func() {
-			time.Sleep(5 * time.Second)
-			handleChanges(g)
-		}()
-	}
-}
-
-func (g *Game) RemoveConnection(connection *websocket.Conn, userID string) {
-	g.Board.Lock()
-	defer g.Board.Unlock()
-	delete(g.EndPingChannels, userID)
-	newUsers := g.Users[:0]
-	for _, user := range g.Users {
-		if user != connection {
-			newUsers = append(newUsers, user)
-		}
-	}
-	g.Users = newUsers
-	lobbyUpdateChannel <- true
-}
-
-func (g *Game) StopPing() {
-	for _, v := range g.EndPingChannels {
-		v <- true
-	}
-}
-
 type gamesType struct {
 	sync.RWMutex
 	m map[string]*Game
@@ -126,12 +49,30 @@ func (gameMap gamesType) MarshalJSON() ([]byte, error) {
 
 var games = gamesType{m: make(map[string]*Game)}
 
-var lobbyConnections = struct {
-	sync.RWMutex
-	m map[*websocket.Conn]bool
-}{m: make(map[*websocket.Conn]bool)}
+var lobby = NewLobby()
 
 var lobbyUpdateChannel = make(chan bool, 100)
+
+func notifyLobby() {
+	for {
+		<-lobbyUpdateChannel
+		games.RLock()
+		toSend, _ := json.Marshal(games)
+		games.RUnlock()
+		lobby.broadcast <- toSend
+	}
+}
+
+var removeGameChannel = make(chan *Game, 100)
+
+func removeGameWorker() {
+	for {
+		game := <-removeGameChannel
+		games.Lock()
+		delete(games.m, game.ID)
+		games.Unlock()
+	}
+}
 
 func normalizeToRange(val, min, max int) int {
 	if val > max {
@@ -186,17 +127,21 @@ func addGame(r *http.Request) string {
 	game := &Game{
 		ID:    gameID,
 		Board: board,
-		Users: make([]*websocket.Conn, 0),
+		Users: make(map[string]*Client),
 		UsersCount: normalizeToRange(
 			getNumericFromForm(r, "players", 1), 1, 30),
 		FoodTick: time.Duration(normalizeToRange(
 			getNumericFromForm(r, "food_tick", 2000), 0, 120000)) * time.Millisecond,
 		MoveTick: time.Duration(normalizeToRange(
 			getNumericFromForm(r, "move_tick", 10), 1, 20000)) * time.Millisecond,
-		EndPingChannels: make(map[string]chan bool, 30),
+		Broadcast:          make(chan []byte),
+		Register:           make(chan *Client),
+		Unregister:         make(chan *Client),
+		ChangeStateChannel: lobbyUpdateChannel,
+		DisposeChannel:     removeGameChannel,
 	}
 	games.m[gameID] = game
-	lobbyUpdateChannel <- true
+	go game.Run()
 	return gameID
 }
 
@@ -207,61 +152,12 @@ func newGameHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, fmt.Sprintf("/game/%s", id), http.StatusFound)
 }
 
-func (g *Game) NotifyUsers() {
-	newUsers := g.Users[:0]
-	for _, user := range g.Users {
-		err := user.WriteJSON(g.Board)
-		if err != nil {
-			user.Close()
-		} else {
-			newUsers = append(newUsers, user)
-		}
-	}
-	g.Users = newUsers
-}
-
-func handleChanges(g *Game) {
-	g.Board.run(g.MoveTick, g.FoodTick, func(b *Board) {
-		g.NotifyUsers()
-		if len(g.Users) == 0 {
-			b.End <- true
-			games.Lock()
-			delete(games.m, g.ID)
-			games.Unlock()
-		}
-	})
-}
-
-func notifyLobbyConnections() {
-	for {
-		<-lobbyUpdateChannel
-		games.RLock()
-		toSend, _ := json.Marshal(games)
-		games.RUnlock()
-		for key := range lobbyConnections.m {
-			err := key.WriteMessage(websocket.TextMessage, toSend)
-			if err != nil {
-				key.Close()
-				lobbyConnections.Lock()
-				delete(lobbyConnections.m, key)
-				lobbyConnections.Unlock()
-			}
-		}
-	}
-}
-
 func lobbyHandler(w http.ResponseWriter, r *http.Request) {
 	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		return
 	}
-	lobbyConnections.Lock()
-	lobbyConnections.m[ws] = true
-	lobbyConnections.Unlock()
-	games.RLock()
-	toSend, _ := json.Marshal(games)
-	games.RUnlock()
-	ws.WriteMessage(websocket.TextMessage, toSend)
+	lobby.register <- NewLobbyConnection(ws, lobby)
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -292,42 +188,12 @@ func gameConnectionHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	defer ws.Close()
 	userID := uuid.Must(uuid.NewV4()).String()
 	userData, serr := getUserData(ws)
 	if serr != nil {
 		return
 	}
-	game.addUser(ws, userID, userData.Name, userData.Color)
-	go pingGameConnection(ws, userID, game)
-	for {
-		var msg UserMoveMessage
-		err := ws.ReadJSON(&msg)
-		if err != nil {
-			break
-		}
-		game.sendChange(msg, userID)
-	}
-}
-
-func pingGameConnection(ws *websocket.Conn, userID string, game *Game) {
-	pingTicker := time.NewTicker(time.Millisecond * 500)
-	endPingChan := game.EndPingChannels[userID]
-	defer pingTicker.Stop()
-	for {
-		select {
-		case <-endPingChan:
-			return
-		case <-pingTicker.C:
-			ws.SetWriteDeadline(time.Now().Add(time.Millisecond * 250))
-			if err := ws.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
-				game.RemoveConnection(ws, userID)
-				ws.Close()
-				return
-			}
-			ws.SetWriteDeadline(time.Time{})
-		}
-	}
+	game.Register <- NewClient(ws, userData.Name, userData.Color, userID, game)
 }
 
 func main() {
@@ -344,7 +210,9 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	go notifyLobbyConnections()
+	go lobby.Run()
+	go notifyLobby()
+	go removeGameWorker()
 	fmt.Println("Waiting on " + port)
 	http.ListenAndServe(":"+port, nil)
 }
