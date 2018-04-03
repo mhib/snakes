@@ -9,7 +9,7 @@ export default class LobbyForm extends React.Component {
       food_tick: 10000,
       width: 10,
       length: 10,
-      end_on_last_player: true,
+      endOnLastPlayer: true,
     };
     this.handleInputChange = this.handleInputChange.bind(this);
   }
@@ -43,9 +43,8 @@ export default class LobbyForm extends React.Component {
       <div>
         End game with only 1 player:
         <input
-          value={this.state.end_on_last_player}
           type="checkbox"
-          checked={this.state.end_on_last_player}
+          checked={this.state.endOnLastPlayer}
           onChange={this.handleInputChange}
         />
       </div>

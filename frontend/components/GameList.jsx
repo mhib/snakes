@@ -11,14 +11,19 @@ align-items: stretch;
 text-align: center;
 `;
 
+const gameListBody = (games) => {
+  if (games.length > 0) {
+    return games.map(game => (
+      <GameSummary key={game.id} game={game} />
+    ));
+  }
+  return <p>No open games.</p>;
+};
+
 const GameList = ({ games }) => (
   <Container>
     <h3>Open games:</h3>
-    {
-      games.map(game => (
-        <GameSummary key={game.id} game={game} />
-      ))
-    }
+    {gameListBody(games)}
   </Container>
 );
 
