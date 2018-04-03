@@ -1,6 +1,15 @@
 import React from 'react';
+import Proptypes from 'prop-types';
 
 export default class LobbyForm extends React.Component {
+  static propTypes = {
+    onSubmit: Proptypes.func,
+  };
+
+  static defaultProps = {
+    onSubmit: () => {},
+  }
+
   constructor(props) {
     super(props);
     this.state = {
@@ -55,7 +64,7 @@ export default class LobbyForm extends React.Component {
     return (
       <div>
         <h3>Create new game</h3>
-        <form action="/new_game/" method="POST">
+        <form action="/new_game/" method="POST" onSubmit={this.props.onSubmit}>
           Number of players:
           <input value={this.state.players} onChange={this.handleInputChange} name="players" required type="number" min="1" max="30" /><br />
           Move tick in milliseconds:

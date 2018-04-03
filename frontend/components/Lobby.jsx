@@ -18,6 +18,7 @@ export default class Lobby extends React.Component {
       games: [],
     };
     this.prepareSocket();
+    this.closeSocket = this.closeSocket.bind(this);
   }
 
   prepareSocket() {
@@ -27,10 +28,14 @@ export default class Lobby extends React.Component {
     };
   }
 
+  closeSocket() {
+    this.socket.close();
+  }
+
   render() {
     return (
       <Container>
-        <LobbyForm />
+        <LobbyForm onSubmit={this.closeSocket} />
         <GameList games={this.state.games} />
       </Container>
     );

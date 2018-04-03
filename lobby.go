@@ -14,7 +14,7 @@ func NewLobbyConnection(conn *websocket.Conn, lobby *Lobby) *lobbyConnection {
 	return &lobbyConnection{
 		conn:  conn,
 		lobby: lobby,
-		send:  make(chan []byte),
+		send:  make(chan []byte, 256),
 	}
 }
 

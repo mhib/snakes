@@ -20,6 +20,11 @@ type gamesType struct {
 	m map[string]*Game
 }
 
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+}
+
 func milliseconds(duration time.Duration) int64 {
 	return duration.Nanoseconds() / 1000000
 }

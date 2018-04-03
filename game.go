@@ -23,7 +23,7 @@ func NewClient(conn *websocket.Conn, name, color, id string, game *Game) *Client
 		color,
 		id,
 		game,
-		make(chan []byte),
+		make(chan []byte, 5),
 		make(chan bool, 1),
 	}
 }
@@ -96,11 +96,6 @@ type UserMoveMessage struct {
 type UserConnectionMessage struct {
 	Name  string `json:"name"`
 	Color string `json:"color"`
-}
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
 }
 
 func (g *Game) sendChange(msg UserMoveMessage, userID string) {
