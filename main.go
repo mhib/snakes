@@ -128,7 +128,7 @@ func addGame(r *http.Request) string {
 		State:   WAITING,
 		Tick:    0,
 		Changes: make(chan Change, 100),
-		End:     make(chan bool),
+		End:     make(chan bool, 1),
 	}
 	game := &Game{
 		ID:    gameID,

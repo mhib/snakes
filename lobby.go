@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gorilla/websocket"
+	"time"
 )
 
 type lobbyConnection struct {
@@ -19,12 +20,22 @@ func NewLobbyConnection(conn *websocket.Conn, lobby *Lobby) *lobbyConnection {
 }
 
 func (lc *lobbyConnection) Run() {
+	pingTicker := time.NewTicker(time.Millisecond * 500)
 	for {
-		message := <-lc.send
-		err := lc.conn.WriteMessage(websocket.TextMessage, message)
-		if err != nil {
-			lc.lobby.unregister <- lc
-			return
+		select {
+		case <-pingTicker.C:
+			lc.conn.SetWriteDeadline(time.Now().Add(time.Millisecond * 250))
+			if err := lc.conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+				lc.lobby.unregister <- lc
+				return
+			}
+			lc.conn.SetWriteDeadline(time.Time{})
+		case message := <-lc.send:
+			err := lc.conn.WriteMessage(websocket.TextMessage, message)
+			if err != nil {
+				lc.lobby.unregister <- lc
+				return
+			}
 		}
 	}
 }
