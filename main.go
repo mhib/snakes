@@ -56,7 +56,7 @@ var games = gamesType{m: make(map[string]*Game)}
 
 var lobby = NewLobby([]byte("[]"))
 
-var lobbyUpdateChannel = make(chan bool, 100)
+var lobbyUpdateChannel = make(chan bool, 1024)
 
 func notifyLobby() {
 	for {
@@ -68,7 +68,7 @@ func notifyLobby() {
 	}
 }
 
-var removeGameChannel = make(chan *Game, 100)
+var removeGameChannel = make(chan *Game, 1024)
 
 func removeGameWorker() {
 	for {
