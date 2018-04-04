@@ -164,16 +164,20 @@ func (g *Game) prepareUsers() {
 }
 
 func (g *Game) broadcastBoard() {
-	val, _ := json.Marshal(g.Board)
+	val, err := json.Marshal(g.Board)
+	if err != nil {
+		return
+	}
 	g.Broadcast <- val
 }
 
-func (g *Game) handleBoardChange(b *Board) {
+func (g *Game) handleBoardChange(b *Board) bool {
 	g.broadcastBoard()
 	if len(g.Users) == 0 {
-		b.End <- true
 		g.DisposeChannel <- g
+		return false
 	}
+	return true
 }
 
 func (g *Game) runBoard() {

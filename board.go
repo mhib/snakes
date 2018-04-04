@@ -178,7 +178,7 @@ func createTicker(tick time.Duration) *time.Ticker {
 	return time.NewTicker(tick)
 }
 
-func (b *Board) run(moveTick, foodTick time.Duration, callback func(*Board)) {
+func (b *Board) run(moveTick, foodTick time.Duration, callback func(*Board) bool) {
 	b.State = PLAYING
 	moveTicker := createTicker(moveTick).C
 	foodTicker := createTicker(foodTick).C
@@ -190,11 +190,15 @@ func (b *Board) run(moveTick, foodTick time.Duration, callback func(*Board)) {
 		case <-moveTicker:
 			b.tick()
 			b.Tick++
-			callback(b)
+			if !callback(b) {
+				break
+			}
 		case <-foodTicker:
 			b.generateFruit()
 			b.Tick++
-			callback(b)
+			if !callback(b) {
+				break
+			}
 		case change := <-b.Changes:
 			b.changeDirection(&change)
 		}
