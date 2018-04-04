@@ -14,8 +14,8 @@ export default class LobbyForm extends React.Component {
     super(props);
     this.state = {
       players: 1,
-      move_tick: 100,
-      food_tick: 10000,
+      moveTick: 100,
+      foodTick: 10000,
       width: 10,
       length: 10,
       endOnLastPlayer: true,
@@ -53,6 +53,7 @@ export default class LobbyForm extends React.Component {
         End game with only 1 player:
         <input
           type="checkbox"
+          name="endOnLastPlayer"
           checked={this.state.endOnLastPlayer}
           onChange={this.handleInputChange}
         />
@@ -68,9 +69,9 @@ export default class LobbyForm extends React.Component {
           Number of players:
           <input value={this.state.players} onChange={this.handleInputChange} name="players" required type="number" min="1" max="30" /><br />
           Move tick in milliseconds:
-          <input value={this.state.move_tick} onChange={this.handleInputChange} name="move_tick" required type="number" min="1" max="3000" /><br />
+          <input value={this.state.moveTick} onChange={this.handleInputChange} name="moveTick" required type="number" min="1" max="3000" /><br />
           Food tick in milliseconds:
-          <input value={this.state.food_tick} onChange={this.handleInputChange} name="food_tick" required type="number" min="0" max="120000" /><br />
+          <input value={this.state.foodTick} onChange={this.handleInputChange} name="foodTick" required type="number" min="0" max="120000" /><br />
           Width:
           <input value={this.state.width} onChange={this.handleInputChange} name="width" required type="number" min="10" max="100" /><br />
           Length:

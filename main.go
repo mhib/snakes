@@ -101,6 +101,14 @@ func getNumericFromForm(r *http.Request, field string, def int) int {
 	return ret
 }
 
+func getBoolFromForm(r *http.Request, field string, def bool) bool {
+	value, hasValue := r.Form[field]
+	if !hasValue {
+		return def
+	}
+	return value[0] == "on"
+}
+
 func getUserData(ws *websocket.Conn) (UserConnectionMessage, error) {
 	var msg UserConnectionMessage
 	err := ws.ReadJSON(&msg)
@@ -119,27 +127,28 @@ func addGame(r *http.Request) string {
 			break
 		}
 	}
+	usersCount := normalizeToRange(getNumericFromForm(r, "players", 1), 1, 30)
 	board := Board{
 		Width: normalizeToRange(
 			getNumericFromForm(r, "width", 20), 1, 100),
 		Length: normalizeToRange(
 			getNumericFromForm(r, "length", 20), 1, 100),
-		Fruits:  make([]Point, 0),
-		State:   WAITING,
-		Tick:    0,
-		Changes: make(chan Change, 100),
-		End:     make(chan bool, 1),
+		Fruits:          make([]Point, 0),
+		State:           WAITING,
+		EndOnLastPlayer: getBoolFromForm(r, "endOnLastPlayer", false) && usersCount > 1,
+		Tick:            0,
+		Changes:         make(chan Change, 100),
+		End:             make(chan bool, 1),
 	}
 	game := &Game{
-		ID:    gameID,
-		Board: board,
-		Users: make(map[string]*Client),
-		UsersCount: normalizeToRange(
-			getNumericFromForm(r, "players", 1), 1, 30),
+		ID:         gameID,
+		Board:      board,
+		Users:      make(map[string]*Client),
+		UsersCount: usersCount,
 		FoodTick: time.Duration(normalizeToRange(
-			getNumericFromForm(r, "food_tick", 2000), 0, 120000)) * time.Millisecond,
+			getNumericFromForm(r, "foodTick", 2000), 0, 120000)) * time.Millisecond,
 		MoveTick: time.Duration(normalizeToRange(
-			getNumericFromForm(r, "move_tick", 10), 1, 20000)) * time.Millisecond,
+			getNumericFromForm(r, "moveTick", 10), 1, 20000)) * time.Millisecond,
 		Broadcast:          make(chan []byte),
 		Register:           make(chan *Client),
 		Unregister:         make(chan *Client),
