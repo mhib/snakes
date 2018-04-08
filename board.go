@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"sync"
 	"time"
 )
 
@@ -14,7 +13,6 @@ type Change struct {
 }
 
 type Board struct {
-	sync.Mutex
 	Width           int         `json:"width"`
 	Length          int         `json:"length"`
 	Snakes          []Snake     `json:"snakes"`

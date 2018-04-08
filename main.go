@@ -29,7 +29,7 @@ func milliseconds(duration time.Duration) int64 {
 	return duration.Nanoseconds() / 1000000
 }
 
-func (gameMap gamesType) MarshalJSON() ([]byte, error) {
+func (gameMap *gamesType) MarshalJSON() ([]byte, error) {
 	buffer := bytes.NewBufferString("[")
 
 	for _, value := range gameMap.m {
@@ -62,7 +62,7 @@ func notifyLobby() {
 	for {
 		<-lobbyUpdateChannel
 		games.RLock()
-		toSend, _ := json.Marshal(games)
+		toSend, _ := json.Marshal(&games)
 		games.RUnlock()
 		lobby.broadcast <- toSend
 	}
