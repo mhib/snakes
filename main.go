@@ -109,8 +109,13 @@ func getBoolFromForm(r *http.Request, field string, def bool) bool {
 	return value[0] == "on"
 }
 
-func getUserData(ws *websocket.Conn) (UserConnectionMessage, error) {
-	var msg UserConnectionMessage
+type userConnectionMessage struct {
+	Name  string `json:"name"`
+	Color string `json:"color"`
+}
+
+func getUserData(ws *websocket.Conn) (userConnectionMessage, error) {
+	var msg userConnectionMessage
 	err := ws.ReadJSON(&msg)
 	return msg, err
 }

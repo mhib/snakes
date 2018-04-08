@@ -5,21 +5,24 @@ import (
 	"time"
 )
 
-type lobbyConnection struct {
+// LobbyConnection - websocket lobby connection
+type LobbyConnection struct {
 	conn  *websocket.Conn
 	lobby *Lobby
 	send  chan []byte
 }
 
-func NewLobbyConnection(conn *websocket.Conn, lobby *Lobby) *lobbyConnection {
-	return &lobbyConnection{
+// NewLobbyConnection initializes lobby connection and returns pointer to it
+func NewLobbyConnection(conn *websocket.Conn, lobby *Lobby) *LobbyConnection {
+	return &LobbyConnection{
 		conn:  conn,
 		lobby: lobby,
 		send:  make(chan []byte, 256),
 	}
 }
 
-func (lc *lobbyConnection) Run() {
+// Run send pings and write messages
+func (lc *LobbyConnection) Run() {
 	pingTicker := time.NewTicker(time.Millisecond * 500)
 	for {
 		select {
@@ -40,24 +43,27 @@ func (lc *lobbyConnection) Run() {
 	}
 }
 
+// Lobby represents lobby state
 type Lobby struct {
 	broadcast      chan []byte
-	register       chan *lobbyConnection
-	unregister     chan *lobbyConnection
-	connections    map[*lobbyConnection]bool
+	register       chan *LobbyConnection
+	unregister     chan *LobbyConnection
+	connections    map[*LobbyConnection]bool
 	initialMessage []byte
 }
 
+// NewLobby initializes new lobby and returns pointer to it
 func NewLobby(initialMessage []byte) *Lobby {
 	return &Lobby{
 		broadcast:      make(chan []byte),
-		register:       make(chan *lobbyConnection),
-		unregister:     make(chan *lobbyConnection),
-		connections:    make(map[*lobbyConnection]bool),
+		register:       make(chan *LobbyConnection),
+		unregister:     make(chan *LobbyConnection),
+		connections:    make(map[*LobbyConnection]bool),
 		initialMessage: initialMessage,
 	}
 }
 
+// Run Registers, unregisters connections and broadcast messages to them
 func (l *Lobby) Run() {
 	lastMessage := l.initialMessage
 	for {

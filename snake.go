@@ -1,5 +1,6 @@
 package main
 
+// Snake - snake's state
 type Snake struct {
 	Body          []Point `json:"body"`
 	Points        int     `json:"points"`
@@ -12,6 +13,7 @@ type Snake struct {
 	ID            string  `json:"id"`
 }
 
+// Possible directions
 const (
 	LEFT = iota
 	RIGHT

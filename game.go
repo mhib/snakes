@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+// Client represents user connection
 type Client struct {
 	conn           *websocket.Conn
 	name           string
@@ -16,6 +17,7 @@ type Client struct {
 	endPingChannel chan bool
 }
 
+// NewClient Initializes new client and returns pointer to it
 func NewClient(conn *websocket.Conn, name, color, id string, game *Game) *Client {
 	return &Client{
 		conn,
@@ -48,7 +50,7 @@ func (client *Client) pingGameConnection() {
 
 func (client *Client) read() {
 	for {
-		var msg UserMoveMessage
+		var msg userMoveMessage
 		err := client.conn.ReadJSON(&msg)
 		if err != nil {
 			client.game.Unregister <- client
@@ -75,6 +77,7 @@ func (client *Client) run() {
 	go client.write()
 }
 
+// Game represent Game state
 type Game struct {
 	ID                 string
 	Board              Board
@@ -89,16 +92,11 @@ type Game struct {
 	DisposeChannel     chan *Game
 }
 
-type UserMoveMessage struct {
+type userMoveMessage struct {
 	Direction string `json:"direction"`
 }
 
-type UserConnectionMessage struct {
-	Name  string `json:"name"`
-	Color string `json:"color"`
-}
-
-func (g *Game) sendChange(msg UserMoveMessage, userID string) {
+func (g *Game) sendChange(msg userMoveMessage, userID string) {
 	var change Change
 	switch msg.Direction {
 	case "LEFT":
@@ -113,6 +111,7 @@ func (g *Game) sendChange(msg UserMoveMessage, userID string) {
 	g.Board.Changes <- change
 }
 
+// Run runs game and broadcasts states update
 func (g *Game) Run() {
 	for {
 		select {

@@ -7,11 +7,13 @@ import (
 	"time"
 )
 
+// Change represent change of snake direction
 type Change struct {
 	ID        string
 	Direction int
 }
 
+// Board represents 2d board
 type Board struct {
 	Width           int         `json:"width"`
 	Length          int         `json:"length"`
@@ -24,6 +26,7 @@ type Board struct {
 	End             chan bool   `json:"-"`
 }
 
+// Represents state of board
 const (
 	WAITING = iota
 	PREPARING
