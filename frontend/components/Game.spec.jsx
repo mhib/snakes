@@ -14,14 +14,12 @@ describe('<Game />', () => {
     mockSocket.send.mockClear();
     Board.mockClear();
   });
-
-  describe('initial state', () => {
-    let wrapper;
-    beforeEach(() => {
-      wrapper = shallow(<Game />);
-    });
-
-    describe('#render', () => {
+  describe('#render', () => {
+    describe('initial state', () => {
+      let wrapper;
+      beforeEach(() => {
+        wrapper = shallow(<Game />);
+      });
       test('it renders correctly', () => {
         expect(wrapper.find(EntryForm)).toHaveLength(1);
         expect(wrapper.find(Ranking)).toHaveLength(0);
