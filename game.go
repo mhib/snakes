@@ -196,7 +196,7 @@ func (g *Game) quitBots() {
 func (g *Game) handleBoardChange(b *Board) bool {
 	g.broadcastBoard()
 	if len(g.Users) == 0 {
-		g.quitBots()
+		go g.quitBots()
 		g.DisposeChannel <- g
 		return false
 	}

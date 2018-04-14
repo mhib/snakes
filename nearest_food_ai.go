@@ -1,9 +1,5 @@
 package main
 
-import (
-	"errors"
-)
-
 type NearestFoodAI struct {
 	*BaseAI
 }
@@ -12,16 +8,14 @@ func (ai *NearestFoodAI) Run() {
 	for {
 		select {
 		case <-ai.QuitChannel:
-			break
+			return
 		case board := <-ai.NotifyChannel:
 			snake, snakeErr := board.GetSnake(ai.SnakeID)
 			if snakeErr != nil {
 				break
 			}
-			direction, dirErr := findNearestFoodDirection(snake, board)
-			if dirErr == nil {
-				ai.UpdateChannel <- Change{ai.SnakeID, direction}
-			}
+			direction := findNearestFoodDirection(snake, board)
+			ai.UpdateChannel <- Change{ai.SnakeID, direction}
 		}
 	}
 }
@@ -34,17 +28,20 @@ type bfsEntry struct {
 
 func getInitialDirection(entry *bfsEntry) int {
 	current := entry
+	if current.parent == nil {
+		return current.direction
+	}
 	for current.parent.parent != nil {
 		current = current.parent
 	}
 	return current.direction
 }
 
-func findNearestFoodDirection(snake *Snake, board *Board) (int, error) {
-	initial := bfsEntry{snake.Head(), snake.PrevDirection, nil}
-	queue := []bfsEntry{initial}
+func findNearestFoodDirection(snake *Snake, board *Board) int {
+	lastEntry := bfsEntry{snake.Head(), snake.PrevDirection, nil}
+	queue := []bfsEntry{lastEntry}
 	queued := make(map[Point]bool)
-	queued[initial.Point] = true
+	queued[lastEntry.Point] = true
 	for len(queue) > 0 {
 		var current bfsEntry
 		current, queue = queue[0], queue[1:]
@@ -54,13 +51,14 @@ func findNearestFoodDirection(snake *Snake, board *Board) (int, error) {
 			}
 			newEntry := bfsEntry{point, direction, &current}
 			if board.IsFruit(point) {
-				return getInitialDirection(&newEntry), nil
+				return getInitialDirection(&newEntry)
 			}
 			queue = append(queue, newEntry)
 			queued[point] = true
+			lastEntry = newEntry
 		}
 	}
-	return -1, errors.New("Path not found")
+	return getInitialDirection(&lastEntry) // If no path found stay alive as long as possible
 }
 
 // NewAI returns new BaseAI
