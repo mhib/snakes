@@ -145,6 +145,8 @@ func addGame(r *http.Request) string {
 		Changes:         make(chan Change, 100),
 		End:             make(chan bool, 1),
 	}
+	bot := NewNearestFoodAI(board.Changes, "bot1")
+	board.AddSnake("bot1", "bot1", "#A09999", 3)
 	game := &Game{
 		ID:         gameID,
 		Board:      board,
@@ -159,6 +161,7 @@ func addGame(r *http.Request) string {
 		Unregister:         make(chan *Client),
 		ChangeStateChannel: lobbyUpdateChannel,
 		DisposeChannel:     removeGameChannel,
+		Bots:               []AI{bot},
 	}
 	games.m[gameID] = game
 	go game.Run()
