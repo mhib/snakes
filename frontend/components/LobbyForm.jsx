@@ -18,6 +18,8 @@ export default class LobbyForm extends React.Component {
       foodTick: 10000,
       width: 10,
       length: 10,
+      nearestFruitBots: 0,
+      randomMoveBots: 0,
       endOnLastPlayer: true,
     };
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -72,6 +74,10 @@ export default class LobbyForm extends React.Component {
           <input value={this.state.moveTick} onChange={this.handleInputChange} name="moveTick" required type="number" min="1" max="3000" /><br />
           Food tick in milliseconds:
           <input value={this.state.foodTick} onChange={this.handleInputChange} name="foodTick" required type="number" min="0" max="120000" /><br />
+          Nearest point bots:
+          <input value={this.state.nearestFruitBots} onChange={this.handleInputChange} name="nearestFruitBots" required type="number" min="0" max="4" /><br />
+          Random move bots:
+          <input value={this.state.randomMoveBots} onChange={this.handleInputChange} name="randomMoveBots" required type="number" min="0" max="4" /><br />
           Width:
           <input value={this.state.width} onChange={this.handleInputChange} name="width" required type="number" min="10" max="100" /><br />
           Length:

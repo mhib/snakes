@@ -90,6 +90,7 @@ type Game struct {
 	Unregister         chan *Client
 	ChangeStateChannel chan bool
 	DisposeChannel     chan *Game
+	Bots               []AI
 }
 
 type userMoveMessage struct {
@@ -138,11 +139,19 @@ func (g *Game) Run() {
 
 func (g *Game) addUser(user *Client) {
 	g.Users[user.id] = user
-	g.Board.addSnake(user.id, user.name, user.color, 3)
+	g.Board.AddSnake(user.id, user.name, user.color, 3)
 	go user.pingGameConnection()
 	g.ChangeStateChannel <- true
 	if g.UsersCount == len(g.Users) {
 		go g.start()
+	}
+}
+
+func (g *Game) runBots() {
+	for _, bot := range g.Bots {
+		go func(b AI) {
+			b.Run()
+		}(bot)
 	}
 }
 
@@ -151,6 +160,7 @@ func (g *Game) start() {
 	g.ChangeStateChannel <- true
 	g.prepareUsers()
 	g.broadcastBoard()
+	g.runBots()
 	time.Sleep(5 * time.Second)
 	g.runBoard()
 }
@@ -170,11 +180,23 @@ func (g *Game) broadcastBoard() {
 		return
 	}
 	g.Broadcast <- val
+	for _, bot := range g.Bots {
+		go func(b AI) {
+			b.Notify(&g.Board)
+		}(bot)
+	}
+}
+
+func (g *Game) quitBots() {
+	for _, bot := range g.Bots {
+		bot.Quit()
+	}
 }
 
 func (g *Game) handleBoardChange(b *Board) bool {
 	g.broadcastBoard()
 	if len(g.Users) == 0 {
+		go g.quitBots()
 		g.DisposeChannel <- g
 		return false
 	}

@@ -120,6 +120,31 @@ func getUserData(ws *websocket.Conn) (userConnectionMessage, error) {
 	return msg, err
 }
 
+func addBots(b *Board, r *http.Request) []AI {
+	ret := make([]AI, 0)
+	counter := 1
+	nearestFruitCount := normalizeToRange(
+		getNumericFromForm(r, "nearestFruitBots", 0), 0, 4)
+	randomCount := normalizeToRange(
+		getNumericFromForm(r, "randomMoveBots", 0), 0, 4)
+
+	for i := 0; i < nearestFruitCount; i++ {
+		name := fmt.Sprintf("Bot-%d", counter)
+		ai := NewNearestFoodAI(b.Changes, name)
+		b.AddSnake(name, name, "#999999", 3)
+		counter++
+		ret = append(ret, ai)
+	}
+	for i := 0; i < randomCount; i++ {
+		name := fmt.Sprintf("Bot-%d", counter)
+		ai := NewRandomMoveAI(b.Changes, name)
+		b.AddSnake(name, name, "#999999", 3)
+		counter++
+		ret = append(ret, ai)
+	}
+	return ret
+}
+
 func addGame(r *http.Request) string {
 	games.Lock()
 	defer games.Unlock()
@@ -145,6 +170,7 @@ func addGame(r *http.Request) string {
 		Changes:         make(chan Change, 100),
 		End:             make(chan bool, 1),
 	}
+	bots := addBots(&board, r)
 	game := &Game{
 		ID:         gameID,
 		Board:      board,
@@ -159,6 +185,7 @@ func addGame(r *http.Request) string {
 		Unregister:         make(chan *Client),
 		ChangeStateChannel: lobbyUpdateChannel,
 		DisposeChannel:     removeGameChannel,
+		Bots:               bots,
 	}
 	games.m[gameID] = game
 	go game.Run()

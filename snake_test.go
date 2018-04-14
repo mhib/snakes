@@ -16,7 +16,7 @@ func TestChangeDirection(t *testing.T) {
 
 func TestGrow(t *testing.T) {
 	snake := Snake{[]Point{}, 0, LEFT, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
-	snake.grow(3)
+	snake.Grow(3)
 	if snake.Eaten != 3 {
 		t.Error("Growing failed")
 	}
@@ -47,7 +47,7 @@ func TestMove(t *testing.T) {
 	first := Snake{[]Point{Point{0, 2}, Point{1, 2}, Point{2, 2}}, 0, LEFT, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
 	first.move(5, 5)
 	newHead := Point{4, 2}
-	if first.head() != newHead {
+	if first.Head() != newHead {
 		t.Error("Move failed")
 	}
 }

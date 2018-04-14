@@ -21,7 +21,7 @@ const (
 	DOWN
 )
 
-func isOpposite(x, y int) bool {
+func IsOpposite(x, y int) bool {
 	switch x {
 	case LEFT:
 		return y == RIGHT
@@ -37,23 +37,23 @@ func isOpposite(x, y int) bool {
 }
 
 func (s *Snake) changeDirection(Direction int) {
-	if !isOpposite(s.PrevDirection, Direction) {
+	if !IsOpposite(s.PrevDirection, Direction) {
 		s.Direction = Direction
 	}
 }
 
-func (s *Snake) head() Point {
+func (s *Snake) Head() Point {
 	return s.Body[0]
 }
 
-func (s *Snake) grow(size uint) {
+func (s *Snake) Grow(size uint) {
 	s.Points++
 	s.Eaten += int(size)
 }
 
 func (s *Snake) collide(other *Snake) bool {
 	for _, b := range other.Body {
-		if b == s.head() {
+		if b == s.Head() {
 			return true
 		}
 	}
@@ -65,7 +65,7 @@ func (s *Snake) collideItself() bool {
 		if i == 0 {
 			continue
 		}
-		if b == s.head() {
+		if b == s.Head() {
 			return true
 		}
 	}
@@ -86,26 +86,18 @@ func (s *Snake) includes(point Point) bool {
 	return false
 }
 
-func modulo(n, m int) int {
-	val := n % m
-	if val >= 0 {
-		return val
-	}
-	return val + m
-}
-
 func (s *Snake) move(width, length int) {
 	s.PrevDirection = s.Direction
-	currentHead := s.head()
+	currentHead := s.Head()
 	switch s.Direction {
 	case LEFT:
-		currentHead.X = modulo(currentHead.X-1, width)
+		currentHead.X = Modulo(currentHead.X-1, width)
 	case RIGHT:
-		currentHead.X = modulo(currentHead.X+1, width)
+		currentHead.X = Modulo(currentHead.X+1, width)
 	case UP:
-		currentHead.Y = modulo(currentHead.Y-1, length)
+		currentHead.Y = Modulo(currentHead.Y-1, length)
 	case DOWN:
-		currentHead.Y = modulo(currentHead.Y+1, length)
+		currentHead.Y = Modulo(currentHead.Y+1, length)
 	}
 	s.Body = append([]Point{currentHead}, s.Body...)
 	if s.Eaten == 0 {

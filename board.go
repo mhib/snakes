@@ -49,13 +49,22 @@ func (b *Board) randomPoint() (Point, error) {
 	}
 	for {
 		point := Point{rand.Intn(b.Width), rand.Intn(b.Length)}
-		if !b.partOfSnake(point) && !b.isFruit(point) {
+		if !b.PartOfSnake(point) && !b.IsFruit(point) {
 			return point, nil
 		}
 	}
 }
 
-func (b *Board) addSnake(id string, name string, color string, size int) {
+func (b *Board) GetSnake(id string) (*Snake, error) {
+	for _, snake := range b.Snakes {
+		if snake.ID == id {
+			return &snake, nil
+		}
+	}
+	return &Snake{}, errors.New("Snake not found")
+}
+
+func (b *Board) AddSnake(id string, name string, color string, size int) {
 	point, err := b.randomPoint()
 	if err != nil {
 		return
@@ -82,7 +91,7 @@ func (b *Board) generateFruit() {
 	b.Fruits = append(b.Fruits, point)
 }
 
-func (b *Board) isFruit(point Point) bool {
+func (b *Board) IsFruit(point Point) bool {
 	for _, p := range b.Fruits {
 		if p == point {
 			return true
@@ -105,9 +114,9 @@ func (b *Board) moveSnakes() bool {
 	for i := range b.Snakes {
 		if !b.Snakes[i].Lost {
 			b.Snakes[i].move(b.Width, b.Length)
-			if b.isFruit(b.Snakes[i].head()) {
-				b.Snakes[i].grow(2)
-				b.removeFromFruits(b.Snakes[i].head())
+			if b.IsFruit(b.Snakes[i].Head()) {
+				b.Snakes[i].Grow(2)
+				b.removeFromFruits(b.Snakes[i].Head())
 				fruitEaten = true
 			}
 		}
@@ -130,7 +139,7 @@ func (b *Board) checkCollisions() {
 	}
 }
 
-func (b *Board) partOfSnake(p Point) bool {
+func (b *Board) PartOfSnake(p Point) bool {
 	for _, s := range b.Snakes {
 		if s.includes(p) {
 			return true
@@ -147,11 +156,11 @@ func (b *Board) print() {
 	for y := 0; y < b.Length; y++ {
 		for x := 0; x < b.Width; x++ {
 			currentPoint := Point{x, y}
-			if b.isFruit(currentPoint) {
+			if b.IsFruit(currentPoint) {
 				fmt.Print("o")
 				continue
 			}
-			if b.partOfSnake(currentPoint) {
+			if b.PartOfSnake(currentPoint) {
 				fmt.Print("x")
 			} else {
 				fmt.Print(" ")
@@ -235,4 +244,16 @@ func (b *Board) hasOnePlayerPlaying() bool {
 		}
 	}
 	return false
+}
+
+func (b *Board) Neighbours(p Point) []Point {
+	left := p
+	left.X = Modulo(p.X-1, b.Width)
+	right := p
+	right.X = Modulo(p.X+1, b.Width)
+	up := p
+	up.Y = Modulo(p.Y-1, b.Length)
+	down := p
+	down.Y = Modulo(p.Y+1, b.Length)
+	return []Point{left, right, up, down}
 }
