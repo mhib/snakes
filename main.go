@@ -145,7 +145,7 @@ func addGame(r *http.Request) string {
 		Changes:         make(chan Change, 100),
 		End:             make(chan bool, 1),
 	}
-	bot := NewNearestFoodAI(board.Changes, "bot1")
+	bot := NewRandomMoveAI(board.Changes, "bot1")
 	board.AddSnake("bot1", "bot1", "#A09999", 3)
 	game := &Game{
 		ID:         gameID,

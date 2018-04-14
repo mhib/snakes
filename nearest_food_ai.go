@@ -45,7 +45,7 @@ func findNearestFoodDirection(snake *Snake, board *Board) int {
 	for len(queue) > 0 {
 		var current bfsEntry
 		current, queue = queue[0], queue[1:]
-		for direction, point := range neighbours(current.Point, board) {
+		for direction, point := range board.Neighbours(current.Point) {
 			if IsOpposite(direction, current.direction) || board.PartOfSnake(point) || queued[point] {
 				continue
 			}
@@ -58,22 +58,9 @@ func findNearestFoodDirection(snake *Snake, board *Board) int {
 			lastEntry = newEntry
 		}
 	}
-	return getInitialDirection(&lastEntry) // If no path found stay alive as long as possible
+	return getInitialDirection(&lastEntry) // If no path found, stay alive as long as possible
 }
 
-// NewAI returns new BaseAI
 func NewNearestFoodAI(updateChannel chan Change, snakeID string) *NearestFoodAI {
 	return &NearestFoodAI{NewAI(updateChannel, snakeID)}
-}
-
-func neighbours(p Point, b *Board) []Point {
-	left := p
-	left.X = Modulo(p.X-1, b.Width)
-	right := p
-	right.X = Modulo(p.X+1, b.Width)
-	up := p
-	up.Y = Modulo(p.Y-1, b.Length)
-	down := p
-	down.Y = Modulo(p.Y+1, b.Length)
-	return []Point{left, right, up, down}
 }

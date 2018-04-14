@@ -245,3 +245,15 @@ func (b *Board) hasOnePlayerPlaying() bool {
 	}
 	return false
 }
+
+func (b *Board) Neighbours(p Point) []Point {
+	left := p
+	left.X = Modulo(p.X-1, b.Width)
+	right := p
+	right.X = Modulo(p.X+1, b.Width)
+	up := p
+	up.Y = Modulo(p.Y-1, b.Length)
+	down := p
+	down.Y = Modulo(p.Y+1, b.Length)
+	return []Point{left, right, up, down}
+}
