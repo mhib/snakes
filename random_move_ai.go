@@ -4,6 +4,7 @@ import (
 	"math/rand"
 )
 
+// RandomMoveAI goes to fruit if fruit is neighbour; goes to random free point otherwise
 type RandomMoveAI struct {
 	*BaseAI
 }
@@ -19,7 +20,9 @@ func (ai *RandomMoveAI) Run() {
 				break
 			}
 			direction := getRandomDirection(snake, board)
-			ai.UpdateChannel <- Change{ai.SnakeID, direction}
+			if direction >= 0 {
+				ai.UpdateChannel <- Change{ai.SnakeID, direction}
+			}
 		}
 	}
 }
