@@ -158,7 +158,9 @@ func (g *Game) start() {
 func (g *Game) prepareUsers() {
 	for _, user := range g.Users {
 		user.endPingChannel <- true
-		go user.run()
+		go func(c *Client) {
+			c.run()
+		}(user)
 	}
 }
 
