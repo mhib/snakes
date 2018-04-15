@@ -55,6 +55,7 @@ func (b *Board) randomPoint() (Point, error) {
 	}
 }
 
+// GetSnake returns snake by ID
 func (b *Board) GetSnake(id string) (*Snake, error) {
 	for _, snake := range b.Snakes {
 		if snake.ID == id {
@@ -64,6 +65,7 @@ func (b *Board) GetSnake(id string) (*Snake, error) {
 	return &Snake{}, errors.New("Snake not found")
 }
 
+// AddSnake add snakes with provided arguments
 func (b *Board) AddSnake(id string, name string, color string, size int) {
 	point, err := b.randomPoint()
 	if err != nil {
@@ -91,6 +93,7 @@ func (b *Board) generateFruit() {
 	b.Fruits = append(b.Fruits, point)
 }
 
+// IsFruit checks if point is a fruit
 func (b *Board) IsFruit(point Point) bool {
 	for _, p := range b.Fruits {
 		if p == point {
@@ -139,6 +142,7 @@ func (b *Board) checkCollisions() {
 	}
 }
 
+//PartOfSnake checks if point is part of a snake
 func (b *Board) PartOfSnake(p Point) bool {
 	for _, s := range b.Snakes {
 		if s.includes(p) {
@@ -246,6 +250,7 @@ func (b *Board) hasOnePlayerPlaying() bool {
 	return false
 }
 
+//Neighbours return neighbours of a given point
 func (b *Board) Neighbours(p Point) []Point {
 	left := p
 	left.X = Modulo(p.X-1, b.Width)

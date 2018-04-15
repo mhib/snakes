@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
-	"github.com/satori/go.uuid"
 	"math/rand"
 	"net/http"
 	"os"
@@ -13,6 +11,9 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/gorilla/websocket"
+	"github.com/satori/go.uuid"
 )
 
 type gamesType struct {
@@ -126,16 +127,24 @@ func addBots(b *Board, r *http.Request) []AI {
 		getNumericFromForm(r, "nearestFruitBots", 0), 0, 4)
 	randomCount := normalizeToRange(
 		getNumericFromForm(r, "randomMoveBots", 0), 0, 4)
+	lazyCount := normalizeToRange(
+		getNumericFromForm(r, "lazyBots", 0), 0, 4)
 
 	for i := 1; i <= nearestFruitCount; i++ {
-		name := fmt.Sprintf("Nearest-Fruit-Bot-%d", i)
+		name := fmt.Sprintf("Nearest-Fruit-Bot#%d", i)
 		ai := NewNearestFoodAI(b.Changes, name)
 		b.AddSnake(name, name, "#999999", 3)
 		ret = append(ret, ai)
 	}
 	for i := 1; i <= randomCount; i++ {
-		name := fmt.Sprintf("Random-Bot-%d", i)
+		name := fmt.Sprintf("Random-Bot#%d", i)
 		ai := NewRandomMoveAI(b.Changes, name)
+		b.AddSnake(name, name, "#999999", 3)
+		ret = append(ret, ai)
+	}
+	for i := 1; i <= lazyCount; i++ {
+		name := fmt.Sprintf("Lazy-Bot#%d", i)
+		ai := NewLazyAI(b.Changes, name)
 		b.AddSnake(name, name, "#999999", 3)
 		ret = append(ret, ai)
 	}

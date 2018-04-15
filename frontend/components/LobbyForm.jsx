@@ -20,6 +20,7 @@ export default class LobbyForm extends React.Component {
       length: 10,
       nearestFruitBots: 0,
       randomMoveBots: 0,
+      lazyBots: 0,
       endOnLastPlayer: true,
     };
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -78,6 +79,8 @@ export default class LobbyForm extends React.Component {
           <input value={this.state.nearestFruitBots} onChange={this.handleInputChange} name="nearestFruitBots" required type="number" min="0" max="4" /><br />
           Random move bots:
           <input value={this.state.randomMoveBots} onChange={this.handleInputChange} name="randomMoveBots" required type="number" min="0" max="4" /><br />
+          Lazy bots:
+          <input value={this.state.lazyBots} onChange={this.handleInputChange} name="lazyBots" required type="number" min="0" max="4" /><br />
           Width:
           <input value={this.state.width} onChange={this.handleInputChange} name="width" required type="number" min="10" max="100" /><br />
           Length:

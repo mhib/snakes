@@ -1,5 +1,6 @@
 package main
 
+// Modulo is mathematical modulo
 func Modulo(n, m int) int {
 	val := n % m
 	if val >= 0 {

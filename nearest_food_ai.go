@@ -1,9 +1,11 @@
 package main
 
+//NearestFoodAI finds shortest path to fruit
 type NearestFoodAI struct {
 	*BaseAI
 }
 
+//Run runs ai
 func (ai *NearestFoodAI) Run() {
 	for {
 		select {
@@ -61,6 +63,7 @@ func findNearestFoodDirection(snake *Snake, board *Board) int {
 	return getInitialDirection(&lastEntry) // If no path found, stay alive as long as possible
 }
 
+//NewNearestFoodAI creates new NearestFoodAI
 func NewNearestFoodAI(updateChannel chan Change, snakeID string) *NearestFoodAI {
 	return &NearestFoodAI{NewAI(updateChannel, snakeID)}
 }

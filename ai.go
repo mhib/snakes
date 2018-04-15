@@ -1,5 +1,6 @@
 package main
 
+// AI defines basic AI methods
 type AI interface {
 	Notify(*Board)
 	Quit()

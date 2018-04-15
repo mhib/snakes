@@ -1,16 +1,14 @@
 package main
 
-import (
-	"math/rand"
-)
+import "math/rand"
 
-// RandomMoveAI goes to fruit if fruit is neighbour; goes to random free point otherwise
-type RandomMoveAI struct {
+// LazyAI that moves when it has to, or has a fruit as neighbour
+type LazyAI struct {
 	*BaseAI
 }
 
-// Run runs AI
-func (ai *RandomMoveAI) Run() {
+//Run runs AI
+func (ai *LazyAI) Run() {
 	for {
 		select {
 		case <-ai.QuitChannel:
@@ -20,7 +18,7 @@ func (ai *RandomMoveAI) Run() {
 			if snakeErr != nil {
 				break
 			}
-			direction := getRandomDirection(snake, board)
+			direction := getNewDirection(snake, board)
 			if direction >= 0 {
 				ai.UpdateChannel <- Change{ai.SnakeID, direction}
 			}
@@ -28,8 +26,9 @@ func (ai *RandomMoveAI) Run() {
 	}
 }
 
-func getRandomDirection(snake *Snake, board *Board) int {
+func getNewDirection(snake *Snake, board *Board) int {
 	results := make([]int, 0)
+	foundCurrent := false
 	for direction, point := range board.Neighbours(snake.Head()) {
 		if IsOpposite(direction, snake.PrevDirection) || board.PartOfSnake(point) {
 			continue
@@ -37,15 +36,18 @@ func getRandomDirection(snake *Snake, board *Board) int {
 		if board.IsFruit(point) {
 			return direction
 		}
+		if direction == snake.PrevDirection {
+			foundCurrent = true
+		}
 		results = append(results, direction)
 	}
-	if len(results) == 0 {
+	if len(results) == 0 || foundCurrent {
 		return -1
 	}
 	return results[rand.Intn(len(results))]
 }
 
-//NewRandomMoveAI creates new RandomMoveAI
-func NewRandomMoveAI(updateChannel chan Change, snakeID string) *RandomMoveAI {
-	return &RandomMoveAI{NewAI(updateChannel, snakeID)}
+//NewLazyAI creates new LazyAI
+func NewLazyAI(updateChannel chan Change, snakeID string) *LazyAI {
+	return &LazyAI{NewAI(updateChannel, snakeID)}
 }

@@ -1,6 +1,6 @@
 package main
 
-// Snake - snake's state
+//Snake - snake's state
 type Snake struct {
 	Body          []Point `json:"body"`
 	Points        int     `json:"points"`
@@ -13,7 +13,7 @@ type Snake struct {
 	ID            string  `json:"id"`
 }
 
-// Possible directions
+//Possible directions
 const (
 	LEFT = iota
 	RIGHT
@@ -21,6 +21,7 @@ const (
 	DOWN
 )
 
+//IsOpposite returns true if direction are opposite
 func IsOpposite(x, y int) bool {
 	switch x {
 	case LEFT:
@@ -42,10 +43,12 @@ func (s *Snake) changeDirection(Direction int) {
 	}
 }
 
+//Head returns head of a snake
 func (s *Snake) Head() Point {
 	return s.Body[0]
 }
 
+//Grow grows a snake
 func (s *Snake) Grow(size uint) {
 	s.Points++
 	s.Eaten += int(size)
