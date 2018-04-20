@@ -203,18 +203,18 @@ func (b *Board) run(moveTick, foodTick time.Duration, callback func(*Board) bool
 	for b.going() {
 		select {
 		case <-b.End:
-			break
+			return
 		case <-moveTicker:
 			b.tick()
 			b.Tick++
 			if !callback(b) {
-				break
+				return
 			}
 		case <-foodTicker:
 			b.generateFruit()
 			b.Tick++
 			if !callback(b) {
-				break
+				return
 			}
 		case change := <-b.Changes:
 			b.changeDirection(&change)
