@@ -137,6 +137,9 @@ func (b *Board) checkCollisions() {
 				b.Snakes[inner].lose()
 			} else if outer != inner && b.Snakes[inner].collide(&b.Snakes[outer]) {
 				b.Snakes[inner].lose()
+				if b.Snakes[outer].Head() == b.Snakes[inner].Head() {
+					b.Snakes[outer].lose()
+				}
 			}
 		}
 	}

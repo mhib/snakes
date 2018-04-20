@@ -53,7 +53,9 @@ func findNearestFoodDirection(snake *Snake, board *Board) int {
 			}
 			newEntry := bfsEntry{point, direction, &current}
 			if board.IsFruit(point) {
-				return getInitialDirection(&newEntry)
+				if !(current.parent == nil && mayCollideWithOtherSnake(point, snake, board)) {
+					return getInitialDirection(&newEntry)
+				}
 			}
 			queue = append(queue, newEntry)
 			queued[point] = true
@@ -61,6 +63,20 @@ func findNearestFoodDirection(snake *Snake, board *Board) int {
 		}
 	}
 	return getInitialDirection(&lastEntry) // If no path found, stay alive as long as possible
+}
+
+func mayCollideWithOtherSnake(p Point, currentSnake *Snake, b *Board) bool {
+	for _, neighbour := range b.Neighbours(p) {
+		for _, snake := range b.Snakes {
+			if snake.ID == currentSnake.ID {
+				continue
+			}
+			if snake.Head() == neighbour {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 //NewNearestFoodAI creates new NearestFoodAI
