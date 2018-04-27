@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { CompactPicker } from 'react-color';
+import CompactPicker from 'react-color/lib/Compact';
 import PropTypes from 'prop-types';
 
 const FormTag = styled.form`
