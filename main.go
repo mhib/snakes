@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"math/rand"
 	"net/http"
 	"os"
@@ -227,7 +228,14 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
-	http.ServeFile(w, r, "frontend/game.html")
+	t, _ := template.ParseFiles("frontend/game.html")
+	var message string
+	if len(game.Users) == game.UsersCount-1 {
+		message = "true"
+	} else {
+		message = "false"
+	}
+	t.Execute(w, message)
 }
 
 func gameConnectionHandler(w http.ResponseWriter, r *http.Request) {

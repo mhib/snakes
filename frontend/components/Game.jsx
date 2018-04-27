@@ -28,8 +28,18 @@ export default class Game extends React.Component {
       gameState: 'notConnected',
       ranking: [],
     };
+    this.checkIfLastPlayer();
     bindAll(this, ['handleSubmit', 'handleUpdate', 'handleClose', 'handleKeyDown',
       'updateRanking']);
+  }
+
+  checkIfLastPlayer() {
+    const dataDiv = document.getElementById('is-last-player');
+    if (dataDiv != null) {
+      this.isLast = (dataDiv.innerText === 'true');
+      return;
+    }
+    this.isLast = false;
   }
 
   shouldRenderEntryForm() {
@@ -37,7 +47,7 @@ export default class Game extends React.Component {
   }
 
   shouldRenderWaiting() {
-    return this.state.gameState === 'waiting';
+    return !this.isLast && this.state.gameState === 'waiting';
   }
 
   shouldRenderRanking() {
