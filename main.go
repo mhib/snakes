@@ -44,7 +44,8 @@ func (gameMap *gamesType) MarshalJSON() ([]byte, error) {
 		buffer.WriteString(fmt.Sprintf("\"width\":%d,", value.Board.Width))
 		buffer.WriteString(fmt.Sprintf("\"length\":%d,", value.Board.Length))
 		buffer.WriteString(fmt.Sprintf("\"foodTick\":%d,", milliseconds(value.FoodTick)))
-		buffer.WriteString(fmt.Sprintf("\"moveTick\":%d", milliseconds(value.MoveTick)))
+		buffer.WriteString(fmt.Sprintf("\"moveTick\":%d,", milliseconds(value.MoveTick)))
+		buffer.WriteString(fmt.Sprintf("\"bots\":%d", len(value.Bots)))
 		buffer.WriteString("}")
 		buffer.WriteString(",")
 	}

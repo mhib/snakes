@@ -31,6 +31,12 @@ export default class GameSummary extends React.Component {
     window.location.href = this.gameHref();
   }
 
+  botsParagraph() {
+    if (this.props.game.bots > 0) {
+      return <p>Bots: {this.props.game.bots}</p>;
+    }
+    return null;
+  }
 
   render() {
     const {
@@ -39,6 +45,7 @@ export default class GameSummary extends React.Component {
     return (
       <Container onClick={this.handleClick}>
         <p>Players: {connected}/{players}</p>
+        {this.botsParagraph()}
         <p>Size: {width}x{length}</p>
         <p>Tick(move/food): {moveTick}/{foodTick} ms</p>
       </Container>
