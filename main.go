@@ -55,6 +55,20 @@ func (gameMap *gamesType) MarshalJSON() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
+func initialGameInfo(g *Game) []byte {
+	buffer := new(bytes.Buffer)
+	buffer.WriteString("{")
+	buffer.WriteString(fmt.Sprintf("\"width\":%d,", g.Board.Width))
+	buffer.WriteString(fmt.Sprintf("\"length\":%d,", g.Board.Length))
+	if len(g.Users) == g.UsersCount-1 {
+		buffer.WriteString("\"isLast\":true")
+	} else {
+		buffer.WriteString("\"isLast\":false")
+	}
+	buffer.WriteString("}")
+	return buffer.Bytes()
+}
+
 var games = gamesType{m: make(map[string]*Game)}
 
 var lobby = NewLobby([]byte("[]"))
@@ -229,13 +243,7 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	t, _ := template.ParseFiles("frontend/game.html")
-	var message string
-	if len(game.Users) == game.UsersCount-1 {
-		message = "true"
-	} else {
-		message = "false"
-	}
-	t.Execute(w, message)
+	t.Execute(w, template.HTML(initialGameInfo(game)))
 }
 
 func gameConnectionHandler(w http.ResponseWriter, r *http.Request) {

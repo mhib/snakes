@@ -5,7 +5,7 @@ import EntryForm from './EntryForm';
 import Waiting from './Waiting';
 import Ranking from './Ranking';
 import SocketFactory from '../factories/GameSocketFactory';
-import Board from '../renderers/DOMBoardRenderer';
+import Board from '../renderers/CanvasBoardRenderer';
 
 const GameContainer = styled.div`
 position: absolute;
@@ -17,8 +17,7 @@ justify-content: center;
 
 const BoardContainer = styled.div`
 margin-top: 2em;
-display: flex;
-flex-direction: column;
+display: ${props => (props.visible ? 'block' : 'none')}
 `;
 
 export default class Game extends React.Component {
@@ -28,18 +27,18 @@ export default class Game extends React.Component {
       gameState: 'notConnected',
       ranking: [],
     };
-    this.checkIfLastPlayer();
+    this.parseInitialBoard();
     bindAll(this, ['handleSubmit', 'handleUpdate', 'handleClose', 'handleKeyDown',
-      'updateRanking']);
+      'updateRanking', 'initBoard']);
   }
 
-  checkIfLastPlayer() {
-    const dataDiv = document.getElementById('is-last-player');
-    if (dataDiv != null) {
-      this.isLast = (dataDiv.innerText === 'true');
-      return;
+  parseInitialBoard() {
+    const dataDiv = document.getElementById('initial-board');
+    try {
+      this.initialBoard = JSON.parse(dataDiv.innerHTML);
+    } catch (e) {
+      this.initialBoard = { width: 10, length: 10, isLast: true };
     }
-    this.isLast = false;
   }
 
   shouldRenderEntryForm() {
@@ -47,11 +46,15 @@ export default class Game extends React.Component {
   }
 
   shouldRenderWaiting() {
-    return !this.isLast && this.state.gameState === 'waiting';
+    return !this.initialBoard.isLast && this.state.gameState === 'waiting';
   }
 
   shouldRenderRanking() {
     return this.state.ranking.length !== 0;
+  }
+
+  initBoard(canvas) {
+    this.board = new Board(canvas, this.initialBoard);
   }
 
   prepareSocket(formState) {
@@ -65,7 +68,6 @@ export default class Game extends React.Component {
   }
 
   handleSubmit(formState) {
-    this.board = new Board(this.boardDiv);
     this.prepareSocket(formState);
     window.addEventListener('keydown', this.handleKeyDown);
   }
@@ -81,6 +83,10 @@ export default class Game extends React.Component {
     const parsedData = JSON.parse(data);
     this.board.update(parsedData);
     this.updateRanking(parsedData);
+  }
+
+  shouldDisplayBoard() {
+    return this.state.gameState === 'playing';
   }
 
   handleKeyDown(event) {
@@ -107,7 +113,9 @@ export default class Game extends React.Component {
         {this.shouldRenderEntryForm() && <EntryForm onSubmit={this.handleSubmit} />}
         {this.shouldRenderWaiting() && <Waiting />}
         {this.shouldRenderRanking() && <Ranking snakes={this.state.ranking} />}
-        <BoardContainer innerRef={(div) => { this.boardDiv = div; }} />
+        <BoardContainer visible={this.shouldDisplayBoard()}>
+          <canvas ref={this.initBoard} />
+        </BoardContainer>
       </GameContainer>
     );
   }
