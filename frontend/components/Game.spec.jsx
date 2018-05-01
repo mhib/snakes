@@ -1,13 +1,13 @@
 import React from 'react';
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import Game from './Game';
 import EntryForm from './EntryForm';
 import Ranking from './Ranking';
-import Board from '../renderers/DOMBoardRenderer';
+import Board from '../renderers/CanvasBoardRenderer';
 
 const mockSocket = { send: jest.fn() };
 jest.mock('../factories/GameSocketFactory', () => () => mockSocket);
-jest.mock('../renderers/DOMBoardRenderer');
+jest.mock('../renderers/CanvasBoardRenderer');
 
 describe('<Game />', () => {
   beforeEach(() => {
@@ -32,13 +32,12 @@ describe('<Game />', () => {
     const initialMessage = '{"width":10,"length":10,"snakes":[{"body":[{"x":5,"y":0}],"points":0,"name":"d","color":"#B0BC00","id":"2bd6aaad-49b2-470b-8881-ad916d94e391"}],"fruits":[],"state":1}';
     const secondMessage = '{"width":10,"length":10,"snakes":[{"body":[{"x":4,"y":0},{"x":5,"y":0}],"points":0,"name":"d","color":"#B0BC00","id":"2bd6aaad-49b2-470b-8881-ad916d94e391"}],"fruits":[{"x":5,"y":7}],"state":2}';
     beforeEach(() => {
-      wrapper = shallow(<Game />);
+      wrapper = mount(<Game />);
     });
     test('rerenders', () => {
       // form submits
       const formState = { name: 'Dd', color: '#123456' };
       wrapper.instance().handleSubmit(formState);
-      expect(Board.mock.calls[0][0]).toBe(wrapper.instance.boardDiv);
       const boardInstance = Board.mock.instances[0];
       expect(mockSocket.onmessage).toBeDefined();
       expect(mockSocket.onopen).toBeDefined();
