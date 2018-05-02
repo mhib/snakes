@@ -11,7 +11,6 @@ export default class Board {
     this.height = (initialBoard.length * CELL_WIDTH) + LINE_WIDTH;
     this.width = (initialBoard.width * CELL_WIDTH) + LINE_WIDTH;
     this.snakes = {};
-    this.drawBoard();
     this.rendered = false;
   }
 
@@ -72,6 +71,7 @@ export default class Board {
   }
 
   render(data) {
+    this.drawBoard();
     this.updateFruits(data);
     data.snakes.forEach((snake) => {
       this.fillRect(snake.body[0].x, snake.body[0].y, snake.color);
