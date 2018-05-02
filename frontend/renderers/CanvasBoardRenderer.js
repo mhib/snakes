@@ -1,7 +1,7 @@
 import PointEquality from '../equalities/PointEquality';
 
-const CELL_WIDTH = 14;
-const LINE_WIDTH = 2;
+export const CELL_WIDTH = 14;
+export const LINE_WIDTH = 2;
 
 export default class Board {
   constructor(domElement, initialBoard) {
