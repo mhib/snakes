@@ -1,17 +1,13 @@
-import PointEquality from '../equalities/PointEquality';
-
 export const CELL_WIDTH = 14;
 export const LINE_WIDTH = 2;
 
-export default class Board {
+export default class BoardRenderer {
   constructor(domElement, initialBoard) {
     this.initialBoard = initialBoard;
     this.domElement = domElement;
     this.ctx = domElement.getContext('2d');
     this.height = (initialBoard.length * CELL_WIDTH) + LINE_WIDTH;
     this.width = (initialBoard.width * CELL_WIDTH) + LINE_WIDTH;
-    this.snakes = {};
-    this.rendered = false;
   }
 
   setDomDimensions() {
@@ -19,16 +15,6 @@ export default class Board {
     this.domElement.height = this.height;
     this.domElement.style.width = this.height;
     this.domElement.width = this.width;
-  }
-
-  update(data) {
-    if (!this.rendered) {
-      this.render(data);
-      this.rendered = true;
-      return;
-    }
-    this.updateSnakes(data);
-    this.updateFruits(data);
   }
 
   static getRect(x, y) {
@@ -46,39 +32,6 @@ export default class Board {
     this.ctx.stroke();
   }
 
-  updateSnakes(data) {
-    data.snakes.forEach((snake) => {
-      const oldSnake = this.snakes[snake.id];
-      if (!PointEquality(oldSnake.body[0], snake.body[0])) {
-        this.fillRect(snake.body[0].x, snake.body[0].y, snake.color);
-      }
-      if (
-        !PointEquality(
-          oldSnake.body[oldSnake.body.length - 1],
-          snake.body[snake.body.length - 1],
-        )
-      ) {
-        this.fillRect(oldSnake.body[oldSnake.body.length - 1].x, oldSnake.body[oldSnake.body.length - 1].y, 'white');
-      }
-      this.updateSnake(snake);
-    });
-  }
-
-  updateFruits({ fruits }) {
-    fruits.forEach(({ x, y }) => {
-      this.fillRect(x, y, 'black');
-    });
-  }
-
-  render(data) {
-    this.drawBoard();
-    this.updateFruits(data);
-    data.snakes.forEach((snake) => {
-      this.fillRect(snake.body[0].x, snake.body[0].y, snake.color);
-      this.updateSnake(snake);
-    });
-  }
-
   drawBoard() {
     this.setDomDimensions();
 
@@ -94,9 +47,5 @@ export default class Board {
       }
     }
     this.ctx.stroke();
-  }
-
-  updateSnake(snake) {
-    this.snakes[snake.id] = snake;
   }
 }

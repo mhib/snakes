@@ -5,7 +5,8 @@ import EntryForm from './EntryForm';
 import Waiting from './Waiting';
 import Ranking from './Ranking';
 import SocketFactory from '../factories/GameSocketFactory';
-import Board from '../renderers/CanvasBoardRenderer';
+import CanvasRenderer from '../renderers/CanvasBoardRenderer';
+import BoardUpdater from '../renderers/BoardUpdater';
 
 const GameContainer = styled.div`
 position: absolute;
@@ -54,7 +55,8 @@ export default class Game extends React.Component {
   }
 
   initBoard(canvas) {
-    this.board = new Board(canvas, this.initialBoard);
+    const renderer = new CanvasRenderer(canvas, this.initialBoard);
+    this.board = new BoardUpdater(renderer);
   }
 
   prepareSocket(formState) {

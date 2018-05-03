@@ -3,11 +3,11 @@ import { mount, shallow } from 'enzyme';
 import Game from './Game';
 import EntryForm from './EntryForm';
 import Ranking from './Ranking';
-import Board from '../renderers/CanvasBoardRenderer';
+import Board from '../renderers/BoardUpdater';
 
 const mockSocket = { send: jest.fn() };
 jest.mock('../factories/GameSocketFactory', () => () => mockSocket);
-jest.mock('../renderers/CanvasBoardRenderer');
+jest.mock('../renderers/BoardUpdater');
 
 describe('<Game />', () => {
   beforeEach(() => {
@@ -38,7 +38,6 @@ describe('<Game />', () => {
       // form submits
       const formState = { name: 'Dd', color: '#123456' };
       wrapper.instance().handleSubmit(formState);
-      const boardInstance = Board.mock.instances[0];
       expect(mockSocket.onmessage).toBeDefined();
       expect(mockSocket.onopen).toBeDefined();
       mockSocket.send.mockClear();
@@ -50,6 +49,7 @@ describe('<Game />', () => {
       // First update
       mockSocket.onmessage({ data: initialMessage });
       wrapper.update();
+      const boardInstance = Board.mock.instances[0];
       expect(boardInstance.update.mock.calls[0][0]).toEqual(JSON.parse(initialMessage));
       expect(wrapper.find(Ranking)).toHaveLength(1);
       expect(wrapper.find(Ranking).prop('snakes'))
