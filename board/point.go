@@ -1,4 +1,4 @@
-package main
+package board
 
 // Point - 2D point representation
 type Point struct {

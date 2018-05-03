@@ -15,11 +15,15 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/satori/go.uuid"
+
+	"github.com/mhib/snakes/ai"
+	"github.com/mhib/snakes/board"
+	"github.com/mhib/snakes/communication"
 )
 
 type gamesType struct {
 	sync.RWMutex
-	m map[string]*Game
+	m map[string]*communication.Game
 }
 
 var upgrader = websocket.Upgrader{
@@ -35,7 +39,7 @@ func (gameMap *gamesType) MarshalJSON() ([]byte, error) {
 	buffer := bytes.NewBufferString("[")
 
 	for _, value := range gameMap.m {
-		if value.Board.State != WAITING || value.UsersCount == 1 || len(value.Users) == 0 {
+		if value.Board.State != board.WAITING || value.UsersCount == 1 || len(value.Users) == 0 {
 			continue
 		}
 		buffer.WriteString("{")
@@ -55,7 +59,7 @@ func (gameMap *gamesType) MarshalJSON() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func initialGameInfo(g *Game) []byte {
+func initialGameInfo(g *communication.Game) []byte {
 	buffer := new(bytes.Buffer)
 	buffer.WriteString("{")
 	buffer.WriteString(fmt.Sprintf("\"width\":%d,", g.Board.Width))
@@ -69,9 +73,9 @@ func initialGameInfo(g *Game) []byte {
 	return buffer.Bytes()
 }
 
-var games = gamesType{m: make(map[string]*Game)}
+var games = gamesType{m: make(map[string]*communication.Game)}
 
-var lobby = NewLobby([]byte("[]"))
+var lobby = communication.NewLobby([]byte("[]"))
 
 var lobbyUpdateChannel = make(chan bool, 1024)
 
@@ -81,11 +85,11 @@ func notifyLobby() {
 		games.RLock()
 		toSend, _ := json.Marshal(&games)
 		games.RUnlock()
-		lobby.broadcast <- toSend
+		lobby.Broadcast <- toSend
 	}
 }
 
-var removeGameChannel = make(chan *Game, 1024)
+var removeGameChannel = make(chan *communication.Game, 1024)
 
 func removeGameWorker() {
 	for {
@@ -137,8 +141,8 @@ func getUserData(ws *websocket.Conn) (userConnectionMessage, error) {
 	return msg, err
 }
 
-func addBots(b *Board, r *http.Request) []AI {
-	ret := make([]AI, 0)
+func addBots(b *board.Board, r *http.Request) []ai.AI {
+	ret := make([]ai.AI, 0)
 	nearestFruitCount := normalizeToRange(
 		getNumericFromForm(r, "nearestFruitBots", 0), 0, 4)
 	randomCount := normalizeToRange(
@@ -148,19 +152,19 @@ func addBots(b *Board, r *http.Request) []AI {
 
 	for i := 1; i <= nearestFruitCount; i++ {
 		name := fmt.Sprintf("Nearest-Fruit-Bot#%d", i)
-		ai := NewNearestFoodAI(b.Changes, name)
+		ai := ai.NewNearestFoodAI(b.Changes, name)
 		b.AddSnake(name, name, "#999999", 3)
 		ret = append(ret, ai)
 	}
 	for i := 1; i <= randomCount; i++ {
 		name := fmt.Sprintf("Random-Bot#%d", i)
-		ai := NewRandomMoveAI(b.Changes, name)
+		ai := ai.NewRandomMoveAI(b.Changes, name)
 		b.AddSnake(name, name, "#999999", 3)
 		ret = append(ret, ai)
 	}
 	for i := 1; i <= lazyCount; i++ {
 		name := fmt.Sprintf("Lazy-Bot#%d", i)
-		ai := NewLazyAI(b.Changes, name)
+		ai := ai.NewLazyAI(b.Changes, name)
 		b.AddSnake(name, name, "#999999", 3)
 		ret = append(ret, ai)
 	}
@@ -180,31 +184,31 @@ func addGame(r *http.Request) string {
 		}
 	}
 	usersCount := normalizeToRange(getNumericFromForm(r, "players", 1), 1, 30)
-	board := Board{
+	b := board.Board{
 		Width: normalizeToRange(
 			getNumericFromForm(r, "width", 20), 1, 100),
 		Length: normalizeToRange(
 			getNumericFromForm(r, "length", 20), 1, 100),
-		Fruits:          make([]Point, 0),
-		State:           WAITING,
+		Fruits:          make([]board.Point, 0),
+		State:           board.WAITING,
 		EndOnLastPlayer: getBoolFromForm(r, "endOnLastPlayer", false) && usersCount > 1,
 		Tick:            0,
-		Changes:         make(chan Change, 100),
+		Changes:         make(chan board.Change, 100),
 		End:             make(chan bool, 1),
 	}
-	bots := addBots(&board, r)
-	game := &Game{
+	bots := addBots(&b, r)
+	game := &communication.Game{
 		ID:         gameID,
-		Board:      board,
-		Users:      make(map[string]*Client),
+		Board:      b,
+		Users:      make(map[string]*communication.Client),
 		UsersCount: usersCount,
 		FoodTick: time.Duration(normalizeToRange(
 			getNumericFromForm(r, "foodTick", 2000), 0, 120000)) * time.Millisecond,
 		MoveTick: time.Duration(normalizeToRange(
 			getNumericFromForm(r, "moveTick", 10), 1, 20000)) * time.Millisecond,
 		Broadcast:          make(chan []byte),
-		Register:           make(chan *Client),
-		Unregister:         make(chan *Client),
+		Register:           make(chan *communication.Client),
+		Unregister:         make(chan *communication.Client),
 		ChangeStateChannel: lobbyUpdateChannel,
 		DisposeChannel:     removeGameChannel,
 		Bots:               bots,
@@ -226,7 +230,7 @@ func lobbyHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	lobby.register <- NewLobbyConnection(ws, lobby)
+	lobby.Register <- communication.NewLobbyConnection(ws, lobby)
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
@@ -238,7 +242,7 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 	defer games.RUnlock()
 	gameID := strings.TrimPrefix(r.URL.Path, "/game/")
 	game, ok := games.m[gameID]
-	if !ok || game.Board.State != WAITING {
+	if !ok || game.Board.State != board.WAITING {
 		http.Redirect(w, r, "/", http.StatusFound)
 		return
 	}
@@ -251,7 +255,7 @@ func gameConnectionHandler(w http.ResponseWriter, r *http.Request) {
 	gameID := strings.TrimPrefix(r.URL.Path, "/gamews/")
 	game, ok := games.m[gameID]
 	games.RUnlock()
-	if !ok || game.Board.State != WAITING {
+	if !ok || game.Board.State != board.WAITING {
 		return
 	}
 	ws, err := upgrader.Upgrade(w, r, nil)
@@ -263,7 +267,7 @@ func gameConnectionHandler(w http.ResponseWriter, r *http.Request) {
 	if serr != nil {
 		return
 	}
-	game.Register <- NewClient(ws, userData.Name, userData.Color, userID, game)
+	game.Register <- communication.NewClient(ws, userData.Name, userData.Color, userID, game)
 }
 
 func main() {

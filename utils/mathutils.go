@@ -1,4 +1,4 @@
-package main
+package utils
 
 // Modulo is mathematical modulo
 func Modulo(n, m int) int {

@@ -1,9 +1,13 @@
-package main
+package communication
 
 import (
 	"encoding/json"
-	"github.com/gorilla/websocket"
 	"time"
+
+	"github.com/gorilla/websocket"
+
+	"github.com/mhib/snakes/ai"
+	"github.com/mhib/snakes/board"
 )
 
 // Client represents user connection
@@ -80,7 +84,7 @@ func (client *Client) run() {
 // Game represent Game state
 type Game struct {
 	ID                 string
-	Board              Board
+	Board              board.Board
 	UsersCount         int
 	Users              map[string]*Client
 	FoodTick           time.Duration
@@ -90,7 +94,7 @@ type Game struct {
 	Unregister         chan *Client
 	ChangeStateChannel chan bool
 	DisposeChannel     chan *Game
-	Bots               []AI
+	Bots               []ai.AI
 }
 
 type userMoveMessage struct {
@@ -98,16 +102,16 @@ type userMoveMessage struct {
 }
 
 func (g *Game) sendChange(msg userMoveMessage, userID string) {
-	var change Change
+	var change board.Change
 	switch msg.Direction {
 	case "LEFT":
-		change = Change{userID, LEFT}
+		change = board.Change{userID, board.LEFT}
 	case "RIGHT":
-		change = Change{userID, RIGHT}
+		change = board.Change{userID, board.RIGHT}
 	case "UP":
-		change = Change{userID, UP}
+		change = board.Change{userID, board.UP}
 	case "DOWN":
-		change = Change{userID, DOWN}
+		change = board.Change{userID, board.DOWN}
 	}
 	g.Board.Changes <- change
 }
@@ -149,14 +153,14 @@ func (g *Game) addUser(user *Client) {
 
 func (g *Game) runBots() {
 	for _, bot := range g.Bots {
-		go func(b AI) {
+		go func(b ai.AI) {
 			b.Run()
 		}(bot)
 	}
 }
 
 func (g *Game) start() {
-	g.Board.State = PREPARING
+	g.Board.State = board.PREPARING
 	g.ChangeStateChannel <- true
 	g.prepareUsers()
 	g.broadcastBoard()
@@ -181,7 +185,7 @@ func (g *Game) broadcastBoard() {
 	}
 	g.Broadcast <- val
 	for _, bot := range g.Bots {
-		go func(b AI) {
+		go func(b ai.AI) {
 			b.Notify(&g.Board)
 		}(bot)
 	}
@@ -193,7 +197,7 @@ func (g *Game) quitBots() {
 	}
 }
 
-func (g *Game) handleBoardChange(b *Board) bool {
+func (g *Game) handleBoardChange(b *board.Board) bool {
 	g.broadcastBoard()
 	if len(g.Users) == 0 {
 		go g.quitBots()
@@ -204,5 +208,5 @@ func (g *Game) handleBoardChange(b *Board) bool {
 }
 
 func (g *Game) runBoard() {
-	g.Board.run(g.MoveTick, g.FoodTick, g.handleBoardChange)
+	g.Board.Run(g.MoveTick, g.FoodTick, g.handleBoardChange)
 }

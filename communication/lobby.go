@@ -1,8 +1,9 @@
-package main
+package communication
 
 import (
-	"github.com/gorilla/websocket"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 // LobbyConnection - websocket lobby connection
@@ -29,14 +30,14 @@ func (lc *LobbyConnection) Run() {
 		case <-pingTicker.C:
 			lc.conn.SetWriteDeadline(time.Now().Add(time.Millisecond * 250))
 			if err := lc.conn.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
-				lc.lobby.unregister <- lc
+				lc.lobby.Unregister <- lc
 				return
 			}
 			lc.conn.SetWriteDeadline(time.Time{})
 		case message := <-lc.send:
 			err := lc.conn.WriteMessage(websocket.TextMessage, message)
 			if err != nil {
-				lc.lobby.unregister <- lc
+				lc.lobby.Unregister <- lc
 				return
 			}
 		}
@@ -45,45 +46,45 @@ func (lc *LobbyConnection) Run() {
 
 // Lobby represents lobby state
 type Lobby struct {
-	broadcast      chan []byte
-	register       chan *LobbyConnection
-	unregister     chan *LobbyConnection
-	connections    map[*LobbyConnection]bool
-	initialMessage []byte
+	Broadcast      chan []byte
+	Register       chan *LobbyConnection
+	Unregister     chan *LobbyConnection
+	Connections    map[*LobbyConnection]bool
+	InitialMessage []byte
 }
 
 // NewLobby initializes new lobby and returns pointer to it
 func NewLobby(initialMessage []byte) *Lobby {
 	return &Lobby{
-		broadcast:      make(chan []byte),
-		register:       make(chan *LobbyConnection),
-		unregister:     make(chan *LobbyConnection),
-		connections:    make(map[*LobbyConnection]bool),
-		initialMessage: initialMessage,
+		Broadcast:      make(chan []byte),
+		Register:       make(chan *LobbyConnection),
+		Unregister:     make(chan *LobbyConnection),
+		Connections:    make(map[*LobbyConnection]bool),
+		InitialMessage: initialMessage,
 	}
 }
 
-// Run Registers, unregisters connections and broadcast messages to them
+// Run Registers, unregisters Connections and Broadcast messages to them
 func (l *Lobby) Run() {
-	lastMessage := l.initialMessage
+	lastMessage := l.InitialMessage
 	for {
 		select {
-		case connection := <-l.register:
-			l.connections[connection] = true
+		case connection := <-l.Register:
+			l.Connections[connection] = true
 			connection.send <- lastMessage
 			go connection.Run()
-		case connection := <-l.unregister:
-			if _, ok := l.connections[connection]; ok {
-				delete(l.connections, connection)
+		case connection := <-l.Unregister:
+			if _, ok := l.Connections[connection]; ok {
+				delete(l.Connections, connection)
 				close(connection.send)
 			}
-		case lastMessage = <-l.broadcast:
-			for connection := range l.connections {
+		case lastMessage = <-l.Broadcast:
+			for connection := range l.Connections {
 				select {
 				case connection.send <- lastMessage:
 				default:
 					close(connection.send)
-					delete(l.connections, connection)
+					delete(l.Connections, connection)
 				}
 			}
 		}

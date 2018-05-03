@@ -1,7 +1,9 @@
-package main
+package ai
 
 import (
 	"math/rand"
+
+	"github.com/mhib/snakes/board"
 )
 
 // RandomMoveAI goes to fruit if fruit is neighbour; goes to random free point otherwise
@@ -15,26 +17,26 @@ func (ai *RandomMoveAI) Run() {
 		select {
 		case <-ai.QuitChannel:
 			return
-		case board := <-ai.NotifyChannel:
-			snake, snakeErr := board.GetSnake(ai.SnakeID)
+		case b := <-ai.NotifyChannel:
+			snake, snakeErr := b.GetSnake(ai.SnakeID)
 			if snakeErr != nil {
 				break
 			}
-			direction := getRandomDirection(snake, board)
+			direction := getRandomDirection(snake, b)
 			if direction >= 0 {
-				ai.UpdateChannel <- Change{ai.SnakeID, direction}
+				ai.UpdateChannel <- board.Change{ai.SnakeID, direction}
 			}
 		}
 	}
 }
 
-func getRandomDirection(snake *Snake, board *Board) int {
+func getRandomDirection(snake *board.Snake, b *board.Board) int {
 	results := make([]int, 0)
-	for direction, point := range board.Neighbours(snake.Head()) {
-		if IsOpposite(direction, snake.PrevDirection) || board.PartOfSnake(point) {
+	for direction, point := range b.Neighbours(snake.Head()) {
+		if board.IsOpposite(direction, snake.PrevDirection) || b.PartOfSnake(point) {
 			continue
 		}
-		if board.IsFruit(point) {
+		if b.IsFruit(point) {
 			return direction
 		}
 		results = append(results, direction)
@@ -46,6 +48,6 @@ func getRandomDirection(snake *Snake, board *Board) int {
 }
 
 //NewRandomMoveAI creates new RandomMoveAI
-func NewRandomMoveAI(updateChannel chan Change, snakeID string) *RandomMoveAI {
+func NewRandomMoveAI(updateChannel chan board.Change, snakeID string) *RandomMoveAI {
 	return &RandomMoveAI{NewAI(updateChannel, snakeID)}
 }

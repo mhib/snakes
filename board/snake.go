@@ -1,4 +1,6 @@
-package main
+package board
+
+import "github.com/mhib/snakes/utils"
 
 //Snake - snake's state
 type Snake struct {
@@ -94,13 +96,13 @@ func (s *Snake) move(width, length int) {
 	currentHead := s.Head()
 	switch s.Direction {
 	case LEFT:
-		currentHead.X = Modulo(currentHead.X-1, width)
+		currentHead.X = utils.Modulo(currentHead.X-1, width)
 	case RIGHT:
-		currentHead.X = Modulo(currentHead.X+1, width)
+		currentHead.X = utils.Modulo(currentHead.X+1, width)
 	case UP:
-		currentHead.Y = Modulo(currentHead.Y-1, length)
+		currentHead.Y = utils.Modulo(currentHead.Y-1, length)
 	case DOWN:
-		currentHead.Y = Modulo(currentHead.Y+1, length)
+		currentHead.Y = utils.Modulo(currentHead.Y+1, length)
 	}
 	s.Body = append([]Point{currentHead}, s.Body...)
 	if s.Eaten == 0 {

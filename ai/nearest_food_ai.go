@@ -1,4 +1,6 @@
-package main
+package ai
+
+import "github.com/mhib/snakes/board"
 
 //NearestFoodAI finds shortest path to fruit
 type NearestFoodAI struct {
@@ -11,19 +13,19 @@ func (ai *NearestFoodAI) Run() {
 		select {
 		case <-ai.QuitChannel:
 			return
-		case board := <-ai.NotifyChannel:
-			snake, snakeErr := board.GetSnake(ai.SnakeID)
+		case b := <-ai.NotifyChannel:
+			snake, snakeErr := b.GetSnake(ai.SnakeID)
 			if snakeErr != nil {
 				break
 			}
-			direction := findNearestFoodDirection(snake, board)
-			ai.UpdateChannel <- Change{ai.SnakeID, direction}
+			direction := findNearestFoodDirection(snake, b)
+			ai.UpdateChannel <- board.Change{ai.SnakeID, direction}
 		}
 	}
 }
 
 type bfsEntry struct {
-	Point
+	board.Point
 	direction int
 	parent    *bfsEntry
 }
@@ -39,21 +41,21 @@ func getInitialDirection(entry *bfsEntry) int {
 	return current.direction
 }
 
-func findNearestFoodDirection(snake *Snake, board *Board) int {
+func findNearestFoodDirection(snake *board.Snake, b *board.Board) int {
 	lastEntry := bfsEntry{snake.Head(), snake.PrevDirection, nil}
 	queue := []bfsEntry{lastEntry}
-	queued := make(map[Point]bool)
+	queued := make(map[board.Point]bool)
 	queued[lastEntry.Point] = true
 	for len(queue) > 0 {
 		var current bfsEntry
 		current, queue = queue[0], queue[1:]
-		for direction, point := range board.Neighbours(current.Point) {
-			if IsOpposite(direction, current.direction) || board.PartOfSnake(point) || queued[point] {
+		for direction, point := range b.Neighbours(current.Point) {
+			if board.IsOpposite(direction, current.direction) || b.PartOfSnake(point) || queued[point] {
 				continue
 			}
 			newEntry := bfsEntry{point, direction, &current}
-			if board.IsFruit(point) {
-				if !(current.parent == nil && mayCollideWithOtherSnake(point, snake, board)) {
+			if b.IsFruit(point) {
+				if !(current.parent == nil && mayCollideWithOtherSnake(point, snake, b)) {
 					return getInitialDirection(&newEntry)
 				}
 			}
@@ -65,7 +67,7 @@ func findNearestFoodDirection(snake *Snake, board *Board) int {
 	return getInitialDirection(&lastEntry) // If no path found, stay alive as long as possible
 }
 
-func mayCollideWithOtherSnake(p Point, currentSnake *Snake, b *Board) bool {
+func mayCollideWithOtherSnake(p board.Point, currentSnake *board.Snake, b *board.Board) bool {
 	for _, neighbour := range b.Neighbours(p) {
 		for _, snake := range b.Snakes {
 			if snake.ID == currentSnake.ID {
@@ -80,6 +82,6 @@ func mayCollideWithOtherSnake(p Point, currentSnake *Snake, b *Board) bool {
 }
 
 //NewNearestFoodAI creates new NearestFoodAI
-func NewNearestFoodAI(updateChannel chan Change, snakeID string) *NearestFoodAI {
+func NewNearestFoodAI(updateChannel chan board.Change, snakeID string) *NearestFoodAI {
 	return &NearestFoodAI{NewAI(updateChannel, snakeID)}
 }

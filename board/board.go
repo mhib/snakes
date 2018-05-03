@@ -1,10 +1,12 @@
-package main
+package board
 
 import (
 	"errors"
 	"fmt"
 	"math/rand"
 	"time"
+
+	"github.com/mhib/snakes/utils"
 )
 
 // Change represent change of snake direction
@@ -195,7 +197,8 @@ func createTicker(tick time.Duration) *time.Ticker {
 	return time.NewTicker(tick)
 }
 
-func (b *Board) run(moveTick, foodTick time.Duration, callback func(*Board) bool) {
+// Run runs board
+func (b *Board) Run(moveTick, foodTick time.Duration, callback func(*Board) bool) {
 	b.State = PLAYING
 	moveTicker := createTicker(moveTick).C
 	foodTicker := createTicker(foodTick).C
@@ -256,12 +259,12 @@ func (b *Board) hasOnePlayerPlaying() bool {
 //Neighbours return neighbours of a given point
 func (b *Board) Neighbours(p Point) []Point {
 	left := p
-	left.X = Modulo(p.X-1, b.Width)
+	left.X = utils.Modulo(p.X-1, b.Width)
 	right := p
-	right.X = Modulo(p.X+1, b.Width)
+	right.X = utils.Modulo(p.X+1, b.Width)
 	up := p
-	up.Y = Modulo(p.Y-1, b.Length)
+	up.Y = utils.Modulo(p.Y-1, b.Length)
 	down := p
-	down.Y = Modulo(p.Y+1, b.Length)
+	down.Y = utils.Modulo(p.Y+1, b.Length)
 	return []Point{left, right, up, down}
 }

@@ -1,6 +1,8 @@
-package main
+package ai
 
 import "math/rand"
+
+import "github.com/mhib/snakes/board"
 
 // LazyAI that moves when it has to, or has a fruit as neighbour
 type LazyAI struct {
@@ -13,27 +15,27 @@ func (ai *LazyAI) Run() {
 		select {
 		case <-ai.QuitChannel:
 			return
-		case board := <-ai.NotifyChannel:
-			snake, snakeErr := board.GetSnake(ai.SnakeID)
+		case b := <-ai.NotifyChannel:
+			snake, snakeErr := b.GetSnake(ai.SnakeID)
 			if snakeErr != nil {
 				break
 			}
-			direction := getNewDirection(snake, board)
+			direction := getNewDirection(snake, b)
 			if direction >= 0 {
-				ai.UpdateChannel <- Change{ai.SnakeID, direction}
+				ai.UpdateChannel <- board.Change{ai.SnakeID, direction}
 			}
 		}
 	}
 }
 
-func getNewDirection(snake *Snake, board *Board) int {
+func getNewDirection(snake *board.Snake, b *board.Board) int {
 	results := make([]int, 0)
 	foundCurrent := false
-	for direction, point := range board.Neighbours(snake.Head()) {
-		if IsOpposite(direction, snake.PrevDirection) || board.PartOfSnake(point) {
+	for direction, point := range b.Neighbours(snake.Head()) {
+		if board.IsOpposite(direction, snake.PrevDirection) || b.PartOfSnake(point) {
 			continue
 		}
-		if board.IsFruit(point) {
+		if b.IsFruit(point) {
 			return direction
 		}
 		if direction == snake.PrevDirection {
@@ -48,6 +50,6 @@ func getNewDirection(snake *Snake, board *Board) int {
 }
 
 //NewLazyAI creates new LazyAI
-func NewLazyAI(updateChannel chan Change, snakeID string) *LazyAI {
+func NewLazyAI(updateChannel chan board.Change, snakeID string) *LazyAI {
 	return &LazyAI{NewAI(updateChannel, snakeID)}
 }
