@@ -23,7 +23,7 @@ func TestGrow(t *testing.T) {
 }
 
 func TestIncludes(t *testing.T) {
-	snake := Snake{[]Point{Point{1, 1}, Point{1, 2}}, 0, LEFT, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
+	snake := Snake{[]Point{{1, 1}, {1, 2}}, 0, LEFT, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
 	if !snake.includes(Point{1, 1}) {
 		t.Error("Includes failed")
 	}
@@ -33,18 +33,18 @@ func TestIncludes(t *testing.T) {
 }
 
 func TestCollideItself(t *testing.T) {
-	first := Snake{[]Point{Point{1, 1}, Point{1, 2}, Point{1, 1}}, 0, LEFT, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
+	first := Snake{[]Point{{1, 1}, {1, 2}, {1, 1}}, 0, LEFT, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
 	if !first.collideItself() {
 		t.Error("Includes failed")
 	}
-	second := Snake{[]Point{Point{1, 1}, Point{1, 2}}, 0, LEFT, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
+	second := Snake{[]Point{{1, 1}, {1, 2}}, 0, LEFT, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
 	if second.collideItself() {
 		t.Error("Includes failed")
 	}
 }
 
 func TestMove(t *testing.T) {
-	first := Snake{[]Point{Point{0, 2}, Point{1, 2}, Point{2, 2}}, 0, LEFT, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
+	first := Snake{[]Point{{0, 2}, {1, 2}, {2, 2}}, 0, LEFT, LEFT, false, 0, "Edward", "#FFDD19", "0d3"}
 	first.move(5, 5)
 	newHead := Point{4, 2}
 	if first.Head() != newHead {
