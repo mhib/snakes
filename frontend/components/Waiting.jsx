@@ -5,7 +5,10 @@ const Paragraph = styled.p`
 font-weight: bold;
 `;
 
-const handleFocus = event => event.target.select();
+const handleFocus = (event) => {
+  event.target.select();
+  document.execCommand('copy');
+};
 
 const Waiting = () => (
   <div>
