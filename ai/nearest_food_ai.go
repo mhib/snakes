@@ -15,7 +15,7 @@ func (ai *NearestFoodAI) Run() {
 			return
 		case b := <-ai.NotifyChannel:
 			snake, snakeErr := b.GetSnake(ai.SnakeID)
-			if snakeErr != nil {
+			if snakeErr != nil || snake.Lost {
 				break
 			}
 			direction := findNearestFoodDirection(snake, b)
@@ -53,11 +53,12 @@ func findNearestFoodDirection(snake *board.Snake, b *board.Board) int {
 			if board.IsOpposite(direction, current.direction) || b.PartOfSnake(point) || queued[point] {
 				continue
 			}
+			if current.parent == nil && mayCollideWithOtherSnake(point, snake, b) {
+				continue
+			}
 			newEntry := bfsEntry{point, direction, &current}
 			if b.IsFruit(point) {
-				if !(current.parent == nil && mayCollideWithOtherSnake(point, snake, b)) {
-					return getInitialDirection(&newEntry)
-				}
+				return getInitialDirection(&newEntry)
 			}
 			queue = append(queue, newEntry)
 			queued[point] = true

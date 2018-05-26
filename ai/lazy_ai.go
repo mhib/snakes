@@ -17,7 +17,7 @@ func (ai *LazyAI) Run() {
 			return
 		case b := <-ai.NotifyChannel:
 			snake, snakeErr := b.GetSnake(ai.SnakeID)
-			if snakeErr != nil {
+			if snakeErr != nil || snake.Lost {
 				break
 			}
 			direction := getNewDirection(snake, b)
